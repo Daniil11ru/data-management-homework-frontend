@@ -10,6 +10,8 @@
 
 В <b>main</b> не пушим. Создаем ветку под задачу или группу задач, работаем в этой ветке, затем пушим ее и пулл-реквестим. Наглядно <a href="https://www.youtube.com/watch?v=8lGpZkjnkt4">здесь</a>.
 
+Компоненты берем из <i>./components/material/</i>. Если нужно создать свои, то создаем с помощью комопонентов из <i>@mui/material</i>.
+
 ### Дополнительно
 1. В VS Code можно поставить плагины ESLint, Node.js Modules Intellisense и Prettier;
 2. Запустить проект можно в WSL, а писать код на Windows. Примерная инструкция <a href="https://learn.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-wsl">здесь</a>.
