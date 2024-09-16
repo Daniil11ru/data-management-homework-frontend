@@ -20,7 +20,7 @@ const Dropdown: React.FC<DropdownProps> = ({ options, onSelect, defaultValue, pl
   };
 
   return (
-    <FormControl variant="outlined" className={className} fullWidth>
+    <FormControl variant="outlined" className={className}>
       <InputLabel>{placeholder}</InputLabel>
       <Select value={selectedValue} onChange={handleChange} label={placeholder} sx={sx}>
         {options.map((option) => (
