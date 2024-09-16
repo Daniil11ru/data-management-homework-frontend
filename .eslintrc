@@ -1,0 +1,6 @@
+{
+    "rules": {
+      "react/no-is-mounted": "off"
+    }
+  }
+  

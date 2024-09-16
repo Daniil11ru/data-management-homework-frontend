@@ -5,9 +5,11 @@ import SellIcon from "@mui/icons-material/Sell";
 import StarIcon from "@mui/icons-material/Star";
 import { teal } from "@mui/material/colors";
 
-import { AgentCardProps } from "./AgentCard.types";
+import { lighten } from '@mui/system'; 
 
-const AgentCardVertical: React.FC<AgentCardProps> = ({
+import { AgentCardSelectableProps } from "./AgentCard.types";
+
+const AgentCardVertical: React.FC<AgentCardSelectableProps> = ({
   image,
   type,
   name,
@@ -15,9 +17,21 @@ const AgentCardVertical: React.FC<AgentCardProps> = ({
   phone,
   priority,
   discount,
+  isSelected,
+  onClick,
 }) => {
   return (
-    <Card sx={{ padding: 0, borderRadius: 2, boxShadow: 3 }}>
+    <Card
+      sx={(theme) => ({
+        padding: 0,
+        borderRadius: 2,
+        boxShadow: 3,
+        cursor: "pointer",
+        backgroundColor: isSelected ? lighten(theme.palette.background.paper, 0.1) : theme.palette.background.paper,
+        transition: "background-color 0.2s ease",
+      })}
+      onClick={onClick}
+    >
       <CardContent
         sx={{
           display: "flex",
@@ -43,9 +57,7 @@ const AgentCardVertical: React.FC<AgentCardProps> = ({
           <Typography
             variant="h6"
             sx={(theme) => ({
-              color: discount > 25
-                ? teal[200]
-                : theme.palette.primary.main
+              color: discount > 25 ? teal[200] : theme.palette.primary.main,
             })}
           >
             {`${discount}%`}
