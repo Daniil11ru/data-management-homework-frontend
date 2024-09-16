@@ -13,8 +13,13 @@ import CssBaseline from "@mui/material/CssBaseline";
 
 import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 
-import agents from "./data/agents.json";
-import types from "./data/types.json";
+import { AgentKey } from "./data/AgentSchema";
+import { SortOptions } from "./data/SortOptions";
+
+import AgentLocalSource from "./data/AgentLocalSource";
+import { AgentRepository } from "./data/AgentRepository";
+import AgentTypeLocalSource from "./data/AgentTypeLocalSource";
+import { AgentTypeRepository } from "./data/AgentTypeRepository";
 
 const darkTheme = createTheme({
   palette: {
@@ -23,42 +28,21 @@ const darkTheme = createTheme({
 });
 
 const App: React.FC = () => {
-  const handleClick = (): void => {
-    console.log("Button was clicked.");
-  };
-
-  const handleSearch = (query: string): void => {
-    setSearchQuery(query);
-    setCurrentPage(1); // Сброс страницы на первую при изменении запроса
-  };
-
-  const handleTypeSelect = (type: string): void => {
-    setSelectedType(type);
-    setCurrentPage(1);
-  };
-
-  const handlePageChange = (
-    event: React.ChangeEvent<unknown>,
-    page: number
-  ) => {
-    setCurrentPage(page);
-  };
-
-  const handleSortSelect = (criteria: string) => {
-    setSortCriteria(criteria);
-    setCurrentPage(1); // Сброс страницы на первую при изменении критерия сортировки
-  };
-
-  // Обработчик изменения порядка сортировки
-  const handleSortOrderChange = () => {
-    setSortOrder((prevOrder) => (prevOrder === "asc" ? "desc" : "asc"));
-  };
-
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>("Все");
-  const [sortCriteria, setSortCriteria] = useState<string>("name");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortCriteria, setSortCriteria] = useState<string>(AgentKey.name);
+  const [sortOrder, setSortOrder] = useState<SortOptions>(SortOptions.ASC);
+  const [selectedAgents, setSelectedAgents] = useState<string[]>([]);
+
+  const agentLocalSource = new AgentLocalSource();
+  const agentRepository = new AgentRepository(agentLocalSource);
+  const agents = agentRepository.getAgents();
+
+  const agentTypeLocalSource = new AgentTypeLocalSource();
+  const agentTypeRepository = new AgentTypeRepository(agentTypeLocalSource);
+  const agentTypes = agentTypeRepository.getAgentTypesMap();
+  const titlesOfAgentTypes = agentTypeRepository.getTitles();
 
   const filteredAgents = agents.filter((agent) => {
     const matchesSearch =
@@ -66,22 +50,22 @@ const App: React.FC = () => {
       agent.phone.includes(searchQuery) ||
       agent.email.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesType = selectedType === "Все" || agent.type === selectedType;
+    const matchesType = selectedType === "Все" || agent.agentType === agentTypeRepository.getId(selectedType);
 
     return matchesSearch && matchesType;
   });
 
   const sortedAgents = [...filteredAgents].sort((a, b) => {
-    if (sortCriteria === "name") {
-      return sortOrder === "asc"
+    if (sortCriteria === AgentKey.name) {
+      return sortOrder === SortOptions.ASC
         ? a.name.localeCompare(b.name)
         : b.name.localeCompare(a.name);
-    } else if (sortCriteria === "discount") {
-      return sortOrder === "asc"
+    } else if (sortCriteria === AgentKey.discount) {
+      return sortOrder === SortOptions.ASC
         ? a.discount - b.discount
         : b.discount - a.discount;
-    } else if (sortCriteria === "priority") {
-      return sortOrder === "asc"
+    } else if (sortCriteria === AgentKey.priority) {
+      return sortOrder === SortOptions.ASC
         ? a.priority - b.priority
         : b.priority - a.priority;
     }
@@ -97,15 +81,49 @@ const App: React.FC = () => {
   );
 
   const sortOptions = [
-    { value: "name", label: "Наименование" },
-    { value: "discount", label: "Скидка" },
-    { value: "priority", label: "Приоритет" },
+    { value: AgentKey.name, label: "Наименование" },
+    { value: AgentKey.discount, label: "Скидка" },
+    { value: AgentKey.priority, label: "Приоритет" },
   ];
 
-  const filterOptions = ["Все", ...types].map((type) => ({
+  const filterOptions = ["Все", ...titlesOfAgentTypes].map((type) => ({
     value: type,
     label: type,
   }));
+
+  const handleSearch = (query: string): void => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+  };
+
+  const handleTypeSelect = (type: string): void => {
+    setSelectedType(type);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (
+    _: React.ChangeEvent<unknown>,
+    page: number
+  ) => {
+    setCurrentPage(page);
+  };
+
+  const handleSortSelect = (criteria: string) => {
+    setSortCriteria(criteria);
+    setCurrentPage(1);
+  };
+
+  const handleSortOrderChange = () => {
+    setSortOrder((prevOrder) => (prevOrder === SortOptions.ASC ? SortOptions.DESC : SortOptions.ASC));
+  };
+
+  const handleCardClick = (agentName: string) => {
+    setSelectedAgents((prevSelected) =>
+      prevSelected.includes(agentName)
+        ? prevSelected.filter((name) => name !== agentName)
+        : [...prevSelected, agentName]
+    );
+  };
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -135,14 +153,14 @@ const App: React.FC = () => {
                   options={sortOptions}
                   onSelect={handleSortSelect}
                   placeholder="Порядок"
-                  defaultValue="name"
+                  defaultValue={AgentKey.name}
                 />
                 <IconButton
                   onClick={handleSortOrderChange}
                   size="small"
                   sx={{ height: "fit-content" }}
                 >
-                  {sortOrder === "asc" ? <ArrowUpward /> : <ArrowDownward />}
+                  {sortOrder === SortOptions.ASC ? <ArrowUpward /> : <ArrowDownward />}
                 </IconButton>
               </Box>
               <Box>
@@ -158,7 +176,17 @@ const App: React.FC = () => {
             <Grid2 container spacing={2} sx={{ flexGrow: 1 }}>
               {currentItems.map((agent, index) => (
                 <Grid2 key={index} size={{ xs: 6, sm: 4, md: 3 }}>
-                  <AgentCard {...agent} />
+                  <AgentCard
+                    image={agent.image}
+                    type={agentTypes.get(agent.agentType)?.title || "Неизвестный тип"}
+                    name={agent.name}
+                    sales={agent.salesCount}
+                    phone={agent.phone}
+                    priority={agent.priority}
+                    discount={agent.discount}
+                    isSelected={selectedAgents.includes(agent.name)}
+                    onClick={() => handleCardClick(agent.name)}
+                  />
                 </Grid2>
               ))}
             </Grid2>
