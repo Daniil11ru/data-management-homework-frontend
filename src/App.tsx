@@ -47,7 +47,6 @@ const App: React.FC = () => {
     newPriority,
     sortOptions,
     filterOptions,
-    deselectAgents,
     handleSearch,
     handleTypeSelect,
     handlePageChange,
@@ -61,32 +60,7 @@ const App: React.FC = () => {
     setPriority,
   } = AppViewModel();
 
-  const handleClickOutside = (event: MouseEvent) => {
-    if (
-      containerRef.current &&
-      !containerRef.current.contains(event.target as Node) &&
-      buttonsRef.current &&
-      !buttonsRef.current.contains(event.target as Node) &&
-      !openAddAgentDialog &&
-      !openChangeAgentDialog &&
-      !openChangeAgentsPriorityDialog
-    ) {
-      deselectAgents();
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener("click", handleClickOutside);
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, []);
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const buttonsRef = useRef<HTMLDivElement>(null);
-
   const handleOnChangeAgentClick = () => {
-    console.log("Clicked.");
   };
 
   const handleOnChangeAgentsPriorityClick = () => {
@@ -94,7 +68,6 @@ const App: React.FC = () => {
   };
 
   const handleOnAddAgentClick = () => {
-    console.log("Clicked.");
   };
 
   const handleConfirmAgentsPriorityChange = () => {
@@ -158,7 +131,6 @@ const App: React.FC = () => {
                   </Box>
                 </Box>
                 <Box
-                  ref={buttonsRef}
                   display="flex"
                   flexDirection="row"
                   gap={2}
@@ -190,7 +162,6 @@ const App: React.FC = () => {
             </Box>
 
             <Grid2
-              ref={containerRef}
               container
               spacing={2}
               sx={{ flexGrow: 1 }}
@@ -230,7 +201,9 @@ const App: React.FC = () => {
 
         <Dialog
           open={openChangeAgentsPriorityDialog}
-          onClose={() => setChangeAgentsPriorityDialogOpen(false)}
+          onClose={() => {
+            setChangeAgentsPriorityDialogOpen(false);
+          }}
         >
           <DialogTitle>Изменить приоритет агентов</DialogTitle>
           <DialogContent>
@@ -258,7 +231,7 @@ const App: React.FC = () => {
                   },
                 "& input[type=number]::-webkit-inner-spin-button, & input[type=number]::-webkit-outer-spin-button":
                   {
-                    filter: "invert(1)", // Инвертирование цвета стрелок
+                    filter: "invert(1)",
                   },
               }}
             ></TextField>

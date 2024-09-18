@@ -114,11 +114,7 @@ export const AppViewModel = () => {
   const handlePriorityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPriority(parseInt(event.target.value));
   };
-
-  const deselectAgents = () => {
-    setSelectedAgents([]);
-  };
-
+  
   return {
     agentTypes,
     currentAgents,
@@ -132,7 +128,6 @@ export const AppViewModel = () => {
     newPriority,
     sortOptions,
     filterOptions,
-    deselectAgents,
     handleSearch,
     handleTypeSelect,
     handlePageChange,
