@@ -1,5 +1,13 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Pagination, Grid2 } from "@mui/material";
+import React, { useRef, useEffect } from "react";
+import {
+  Pagination,
+  Grid2,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+} from "@mui/material";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
@@ -12,15 +20,12 @@ import Button from "./components/material/Button";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
-import { ArrowDownward, ArrowUpward, More } from "@mui/icons-material";
+import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 
 import { AgentKey } from "./data/AgentSchema";
 import { SortOptions } from "./data/SortOptions";
 
-import AgentLocalSource from "./data/AgentLocalSource";
-import { AgentRepository } from "./data/AgentRepository";
-import AgentTypeLocalSource from "./data/AgentTypeLocalSource";
-import { AgentTypeRepository } from "./data/AgentTypeRepository";
+import { AppViewModel } from "./AppViewModel";
 
 const darkTheme = createTheme({
   palette: {
@@ -29,104 +34,44 @@ const darkTheme = createTheme({
 });
 
 const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedType, setSelectedType] = useState<string>("Все");
-  const [sortCriteria, setSortCriteria] = useState<string>(AgentKey.name);
-  const [sortOrder, setSortOrder] = useState<SortOptions>(SortOptions.ASC);
-  const [selectedAgents, setSelectedAgents] = useState<number[]>([]);
-
-  const agentLocalSource = new AgentLocalSource();
-  const agentRepository = new AgentRepository(agentLocalSource);
-  const agents = agentRepository.getAgents();
-
-  const agentTypeLocalSource = new AgentTypeLocalSource();
-  const agentTypeRepository = new AgentTypeRepository(agentTypeLocalSource);
-  const agentTypes = agentTypeRepository.getAgentTypesMap();
-  const titlesOfAgentTypes = agentTypeRepository.getTitles();
-
-  const filteredAgents = agents.filter((agent) => {
-    const matchesSearch =
-      agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      agent.phone.includes(searchQuery) ||
-      agent.email.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesType =
-      selectedType === "Все" ||
-      agent.agentType === agentTypeRepository.getId(selectedType);
-
-    return matchesSearch && matchesType;
-  });
-
-  const sortedAgents = [...filteredAgents].sort((a, b) => {
-    if (sortCriteria === AgentKey.name) {
-      return sortOrder === SortOptions.ASC
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name);
-    } else if (sortCriteria === AgentKey.discount) {
-      return sortOrder === SortOptions.ASC
-        ? a.discount - b.discount
-        : b.discount - a.discount;
-    } else if (sortCriteria === AgentKey.priority) {
-      return sortOrder === SortOptions.ASC
-        ? a.priority - b.priority
-        : b.priority - a.priority;
-    }
-    return 0;
-  });
-
-  const itemsPerPage = 8;
-  const totalPages = Math.ceil(sortedAgents.length / itemsPerPage);
-
-  const currentItems = sortedAgents.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  const sortOptions = [
-    { value: AgentKey.name, label: "Наименование" },
-    { value: AgentKey.discount, label: "Скидка" },
-    { value: AgentKey.priority, label: "Приоритет" },
-  ];
-
-  const filterOptions = ["Все", ...titlesOfAgentTypes].map((type) => ({
-    value: type,
-    label: type,
-  }));
-
-  const handleSearch = (query: string): void => {
-    setSearchQuery(query);
-    setCurrentPage(1);
-  };
-
-  const handleTypeSelect = (type: string): void => {
-    setSelectedType(type);
-    setCurrentPage(1);
-  };
-
-  const handlePageChange = (_: React.ChangeEvent<unknown>, page: number) => {
-    setCurrentPage(page);
-  };
-
-  const handleSortSelect = (criteria: string) => {
-    setSortCriteria(criteria);
-    setCurrentPage(1);
-  };
-
-  const handleSortOrderChange = () => {
-    setSortOrder((prevOrder) =>
-      prevOrder === SortOptions.ASC ? SortOptions.DESC : SortOptions.ASC
-    );
-  };
+  const {
+    agentTypes,
+    currentAgents,
+    currentPage,
+    totalPages,
+    sortOrder,
+    selectedAgents,
+    openChangeAgentsPriorityDialog,
+    openChangeAgentDialog,
+    openAddAgentDialog,
+    newPriority,
+    sortOptions,
+    filterOptions,
+    deselectAgents,
+    handleSearch,
+    handleTypeSelect,
+    handlePageChange,
+    handleSortSelect,
+    handleSortOrderChange,
+    handleCardClick,
+    handlePriorityChange,
+    setChangeAgentsPriorityDialogOpen,
+    setAddAgentDialogOpen,
+    setChangeAgentDialogOpen,
+    setPriority,
+  } = AppViewModel();
 
   const handleClickOutside = (event: MouseEvent) => {
     if (
       containerRef.current &&
       !containerRef.current.contains(event.target as Node) &&
       buttonsRef.current &&
-      !buttonsRef.current.contains(event.target as Node)
+      !buttonsRef.current.contains(event.target as Node) &&
+      !openAddAgentDialog &&
+      !openChangeAgentDialog &&
+      !openChangeAgentsPriorityDialog
     ) {
-      setSelectedAgents([]);
+      deselectAgents();
     }
   };
 
@@ -139,24 +84,21 @@ const App: React.FC = () => {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonsRef = useRef<HTMLDivElement>(null);
-  const handleCardClick = (agentId: number) => {
-    setSelectedAgents((prevSelected) =>
-      prevSelected.includes(agentId)
-        ? prevSelected.filter((id) => id !== agentId)
-        : [...prevSelected, agentId]
-    );
-  };
 
   const handleOnChangeAgentClick = () => {
     console.log("Clicked.");
   };
 
   const handleOnChangeAgentsPriorityClick = () => {
-    console.log("Clicked.");
+    setChangeAgentsPriorityDialogOpen(true);
   };
 
   const handleOnAddAgentClick = () => {
     console.log("Clicked.");
+  };
+
+  const handleConfirmAgentsPriorityChange = () => {
+    setChangeAgentsPriorityDialogOpen(false);
   };
 
   return (
@@ -215,7 +157,12 @@ const App: React.FC = () => {
                     </IconButton>
                   </Box>
                 </Box>
-                <Box ref={buttonsRef} display="flex" flexDirection="row" gap={2}>
+                <Box
+                  ref={buttonsRef}
+                  display="flex"
+                  flexDirection="row"
+                  gap={2}
+                >
                   {selectedAgents.length > 1 && (
                     <Button
                       label="Изменить приоритет"
@@ -224,26 +171,31 @@ const App: React.FC = () => {
                     ></Button>
                   )}
                   {selectedAgents.length === 1 && (
-                  <Button
-                    label="Изменить"
-                    onClick={handleOnChangeAgentClick}
-                    size="large"
-                  ></Button>
+                    <Button
+                      label="Изменить"
+                      onClick={handleOnChangeAgentClick}
+                      size="large"
+                    ></Button>
                   )}
                   {selectedAgents.length === 0 && (
-                  <Button
-                    label="Добавить"
-                    onClick={handleOnAddAgentClick}
-                    size="large"
-                    color="success"
-                  ></Button>
+                    <Button
+                      label="Добавить"
+                      onClick={handleOnAddAgentClick}
+                      size="large"
+                      color="success"
+                    ></Button>
                   )}
                 </Box>
               </Box>
             </Box>
 
-            <Grid2 ref={containerRef} container spacing={2} sx={{ flexGrow: 1 }}>
-              {currentItems.map((agent, index) => (
+            <Grid2
+              ref={containerRef}
+              container
+              spacing={2}
+              sx={{ flexGrow: 1 }}
+            >
+              {currentAgents.map((agent, index) => (
                 <Grid2 key={index} size={{ xs: 6, sm: 4, md: 3 }}>
                   <AgentCard
                     image={agent.image}
@@ -275,6 +227,50 @@ const App: React.FC = () => {
             />
           </Box>
         </Box>
+
+        <Dialog
+          open={openChangeAgentsPriorityDialog}
+          onClose={() => setChangeAgentsPriorityDialogOpen(false)}
+        >
+          <DialogTitle>Изменить приоритет агентов</DialogTitle>
+          <DialogContent>
+            <TextField
+              fullWidth
+              label="Приоритет"
+              value={newPriority}
+              onChange={handlePriorityChange}
+              type="number"
+              slotProps={{
+                inputLabel: {
+                  shrink: true,
+                },
+              }}
+              sx={{
+                marginTop: 1,
+                "& input[type=number]": {
+                  "-moz-appearance": "textfield",
+                  color: "#fff",
+                },
+                "& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button":
+                  {
+                    "-webkit-appearance": "none",
+                    margin: 0,
+                  },
+                "& input[type=number]::-webkit-inner-spin-button, & input[type=number]::-webkit-outer-spin-button":
+                  {
+                    filter: "invert(1)", // Инвертирование цвета стрелок
+                  },
+              }}
+            ></TextField>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              label="Подтвердить"
+              onClick={handleConfirmAgentsPriorityChange}
+              color="primary"
+            ></Button>
+          </DialogActions>
+        </Dialog>
       </Container>
     </ThemeProvider>
   );
