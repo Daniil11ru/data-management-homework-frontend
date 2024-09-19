@@ -17,7 +17,7 @@
     "Name": "Агент 2",
     "SalesCount": 20,
     "Phone": "+7 222 222 22 22",
-    "Priority": 8,
+    "Priority": 10,
     "Discount": 30,
     "Email": "agent2@example.com"
   },
@@ -61,7 +61,7 @@
     "Name": "Агент 6",
     "SalesCount": 15,
     "Phone": "+7 666 666 66 66",
-    "Priority": 12,
+    "Priority": 14,
     "Discount": 25,
     "Email": "agent6@example.com"
   },
@@ -72,7 +72,7 @@
     "Name": "Агент 7",
     "SalesCount": 15,
     "Phone": "+7 777 777 77 77",
-    "Priority": 13,
+    "Priority": 14,
     "Discount": 40,
     "Email": "agent7@example.com"
   },

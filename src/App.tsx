@@ -1,5 +1,13 @@
-import React, { useState } from "react";
-import { Pagination, Grid2 } from "@mui/material";
+import React, { useRef, useEffect } from "react";
+import {
+  Pagination,
+  Grid2,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+} from "@mui/material";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
@@ -7,6 +15,7 @@ import IconButton from "@mui/material/IconButton";
 import SearchField from "./components/material/SearchField";
 import Dropdown from "./components/material/Dropdown";
 import AgentCard from "./components/material/AgentCardVertical";
+import Button from "./components/material/Button";
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -16,10 +25,8 @@ import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 import { AgentKey } from "./data/AgentSchema";
 import { SortOptions } from "./data/SortOptions";
 
-import AgentLocalSource from "./data/AgentLocalSource";
+import { AppViewModel } from "./AppViewModel";
 import { AgentRepository } from "./data/AgentRepository";
-import AgentTypeLocalSource from "./data/AgentTypeLocalSource";
-import { AgentTypeRepository } from "./data/AgentTypeRepository";
 
 const darkTheme = createTheme({
   palette: {
@@ -28,68 +35,36 @@ const darkTheme = createTheme({
 });
 
 const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedType, setSelectedType] = useState<string>("Все");
-  const [sortCriteria, setSortCriteria] = useState<string>(AgentKey.name);
-  const [sortOrder, setSortOrder] = useState<SortOptions>(SortOptions.ASC);
-  const [selectedAgents, setSelectedAgents] = useState<string[]>([]);
+  const {
+    agentTypesMap,
+    currentAgents,
+    currentPage,
+    totalPages,
+    sortOrder,
+    selectedAgents,
+    openChangeAgentsPriorityDialog,
+    openChangeAgentDialog,
+    openAddAgentDialog,
+    newPriority,
+    sortOptions,
+    filterOptions,
+    getMaxPriorityOfSelectedAgents,
+    updatePriorityOfSelectedAgents,
+    setChangeAgentsPriorityDialogOpen,
+    setAddAgentDialogOpen,
+    setChangeAgentDialogOpen,
+    setPriority,
+    setSelectedAgents,
+    setSortCriteria,
+    setSortOrder,
+    setCurrentPage,
+    setSelectedType,
+    setSearchQuery
+  } = AppViewModel();
 
-  const agentLocalSource = new AgentLocalSource();
-  const agentRepository = new AgentRepository(agentLocalSource);
-  const agents = agentRepository.getAgents();
-
-  const agentTypeLocalSource = new AgentTypeLocalSource();
-  const agentTypeRepository = new AgentTypeRepository(agentTypeLocalSource);
-  const agentTypes = agentTypeRepository.getAgentTypesMap();
-  const titlesOfAgentTypes = agentTypeRepository.getTitles();
-
-  const filteredAgents = agents.filter((agent) => {
-    const matchesSearch =
-      agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      agent.phone.includes(searchQuery) ||
-      agent.email.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesType = selectedType === "Все" || agent.agentType === agentTypeRepository.getId(selectedType);
-
-    return matchesSearch && matchesType;
-  });
-
-  const sortedAgents = [...filteredAgents].sort((a, b) => {
-    if (sortCriteria === AgentKey.name) {
-      return sortOrder === SortOptions.ASC
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name);
-    } else if (sortCriteria === AgentKey.discount) {
-      return sortOrder === SortOptions.ASC
-        ? a.discount - b.discount
-        : b.discount - a.discount;
-    } else if (sortCriteria === AgentKey.priority) {
-      return sortOrder === SortOptions.ASC
-        ? a.priority - b.priority
-        : b.priority - a.priority;
-    }
-    return 0;
-  });
-
-  const itemsPerPage = 8;
-  const totalPages = Math.ceil(sortedAgents.length / itemsPerPage);
-
-  const currentItems = sortedAgents.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  const sortOptions = [
-    { value: AgentKey.name, label: "Наименование" },
-    { value: AgentKey.discount, label: "Скидка" },
-    { value: AgentKey.priority, label: "Приоритет" },
-  ];
-
-  const filterOptions = ["Все", ...titlesOfAgentTypes].map((type) => ({
-    value: type,
-    label: type,
-  }));
+  const handlePageChange = (_: React.ChangeEvent<unknown>, page: number) => {
+    setCurrentPage(page);
+  };
 
   const handleSearch = (query: string): void => {
     setSearchQuery(query);
@@ -101,29 +76,45 @@ const App: React.FC = () => {
     setCurrentPage(1);
   };
 
-  const handlePageChange = (
-    _: React.ChangeEvent<unknown>,
-    page: number
-  ) => {
-    setCurrentPage(page);
-  };
-
   const handleSortSelect = (criteria: string) => {
     setSortCriteria(criteria);
     setCurrentPage(1);
   };
 
   const handleSortOrderChange = () => {
-    setSortOrder((prevOrder) => (prevOrder === SortOptions.ASC ? SortOptions.DESC : SortOptions.ASC));
-  };
-
-  const handleCardClick = (agentName: string) => {
-    setSelectedAgents((prevSelected) =>
-      prevSelected.includes(agentName)
-        ? prevSelected.filter((name) => name !== agentName)
-        : [...prevSelected, agentName]
+    setSortOrder((prevOrder) =>
+      prevOrder === SortOptions.ASC ? SortOptions.DESC : SortOptions.ASC
     );
   };
+
+  const handlePriorityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPriority(parseInt(event.target.value));
+  };
+
+  const handleOnChangeAgentClick = () => {
+  };
+
+  const handleOnChangeAgentsPriorityClick = () => {
+    setPriority(getMaxPriorityOfSelectedAgents());
+    setChangeAgentsPriorityDialogOpen(true);
+  };
+
+  const handleOnAddAgentClick = () => {
+  };
+
+  const handleConfirmAgentsPriorityChange = () => {
+    setChangeAgentsPriorityDialogOpen(false);
+    updatePriorityOfSelectedAgents();
+  };
+
+  const handleCardClick = (agentId: number) => {
+    setSelectedAgents((prevSelected) =>
+      prevSelected.includes(agentId)
+        ? prevSelected.filter((id) => id !== agentId)
+        : [...prevSelected, agentId]
+    );
+  };
+
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -144,48 +135,94 @@ const App: React.FC = () => {
             p={2}
             sx={{ flexGrow: 1 }}
           >
-            <Box display="flex" flexDirection="row" alignItems="center" gap={2}>
-              <Box flexGrow={1}>
-                <SearchField placeholder="Поиск" onSearch={handleSearch} />
-              </Box>
-              <Box display="flex" flexDirection="row" alignItems="center">
-                <Dropdown
-                  options={sortOptions}
-                  onSelect={handleSortSelect}
-                  placeholder="Порядок"
-                  defaultValue={AgentKey.name}
-                />
-                <IconButton
-                  onClick={handleSortOrderChange}
-                  size="small"
-                  sx={{ height: "fit-content" }}
+            <Box display="flex" flexDirection="column" gap={3}>
+              <SearchField placeholder="Поиск" onSearch={handleSearch} />
+              <Box
+                display="flex"
+                flexDirection="row"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Box display="flex" flexDirection="row" gap={3}>
+                  <Dropdown
+                    options={filterOptions}
+                    onSelect={handleTypeSelect}
+                    placeholder="Тип"
+                    defaultValue="Все"
+                    sx={{ width: 100 }}
+                  />
+                  <Box display="flex" flexDirection="row" alignItems="center">
+                    <Dropdown
+                      options={sortOptions}
+                      onSelect={handleSortSelect}
+                      placeholder="Порядок"
+                      defaultValue={AgentKey.name}
+                      sx={{ width: 200 }}
+                    />
+                    <IconButton
+                      onClick={handleSortOrderChange}
+                      size="small"
+                      sx={{ height: "fit-content" }}
+                    >
+                      {sortOrder === SortOptions.ASC ? (
+                        <ArrowUpward />
+                      ) : (
+                        <ArrowDownward />
+                      )}
+                    </IconButton>
+                  </Box>
+                </Box>
+                <Box
+                  display="flex"
+                  flexDirection="row"
+                  gap={2}
                 >
-                  {sortOrder === SortOptions.ASC ? <ArrowUpward /> : <ArrowDownward />}
-                </IconButton>
-              </Box>
-              <Box>
-                <Dropdown
-                  options={filterOptions}
-                  onSelect={handleTypeSelect}
-                  placeholder="Тип"
-                  defaultValue="Все"
-                />
+                  {selectedAgents.length > 1 && (
+                    <Button
+                      label="Изменить приоритет"
+                      onClick={handleOnChangeAgentsPriorityClick}
+                      size="large"
+                    ></Button>
+                  )}
+                  {selectedAgents.length === 1 && (
+                    <Button
+                      label="Изменить"
+                      onClick={handleOnChangeAgentClick}
+                      size="large"
+                    ></Button>
+                  )}
+                  {selectedAgents.length === 0 && (
+                    <Button
+                      label="Добавить"
+                      onClick={handleOnAddAgentClick}
+                      size="large"
+                      color="success"
+                    ></Button>
+                  )}
+                </Box>
               </Box>
             </Box>
 
-            <Grid2 container spacing={2} sx={{ flexGrow: 1 }}>
-              {currentItems.map((agent, index) => (
+            <Grid2
+              container
+              spacing={2}
+              sx={{ flexGrow: 1 }}
+            >
+              {currentAgents.map((agent, index) => (
                 <Grid2 key={index} size={{ xs: 6, sm: 4, md: 3 }}>
                   <AgentCard
                     image={agent.image}
-                    type={agentTypes.get(agent.agentType)?.title || "Неизвестный тип"}
+                    type={
+                      agentTypesMap.get(agent.agentType)?.title ||
+                      "Неизвестный тип"
+                    }
                     name={agent.name}
                     sales={agent.salesCount}
                     phone={agent.phone}
                     priority={agent.priority}
                     discount={agent.discount}
-                    isSelected={selectedAgents.includes(agent.name)}
-                    onClick={() => handleCardClick(agent.name)}
+                    isSelected={selectedAgents.includes(agent.id)}
+                    onClick={() => handleCardClick(agent.id)}
                   />
                 </Grid2>
               ))}
@@ -203,6 +240,52 @@ const App: React.FC = () => {
             />
           </Box>
         </Box>
+
+        <Dialog
+          open={openChangeAgentsPriorityDialog}
+          onClose={() => {
+            setChangeAgentsPriorityDialogOpen(false);
+          }}
+        >
+          <DialogTitle>Изменить приоритет агентов</DialogTitle>
+          <DialogContent>
+            <TextField
+              fullWidth
+              label="Приоритет"
+              value={newPriority}
+              onChange={handlePriorityChange}
+              type="number"
+              slotProps={{
+                inputLabel: {
+                  shrink: true,
+                },
+              }}
+              sx={{
+                marginTop: 1,
+                "& input[type=number]": {
+                  "-moz-appearance": "textfield",
+                  color: "#fff",
+                },
+                "& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button":
+                  {
+                    "-webkit-appearance": "none",
+                    margin: 0,
+                  },
+                "& input[type=number]::-webkit-inner-spin-button, & input[type=number]::-webkit-outer-spin-button":
+                  {
+                    filter: "invert(1)",
+                  },
+              }}
+            ></TextField>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              label="Подтвердить"
+              onClick={handleConfirmAgentsPriorityChange}
+              color="primary"
+            ></Button>
+          </DialogActions>
+        </Dialog>
       </Container>
     </ThemeProvider>
   );

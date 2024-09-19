@@ -4,6 +4,7 @@ import { Button as MaterialButton } from '@mui/material';
 interface ButtonProps {
   label: string;
   onClick: () => void;
+  onClickCapture?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   variant?: 'text' | 'outlined' | 'contained';
   color?: 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
   size?: 'small' | 'medium' | 'large';
@@ -13,6 +14,7 @@ interface ButtonProps {
 const Button: React.FC<ButtonProps> = ({
   label,
   onClick,
+  onClickCapture, // Добавляем onClickCapture в пропсы
   variant = 'contained',
   color = 'primary',
   size = 'medium',
@@ -24,6 +26,7 @@ const Button: React.FC<ButtonProps> = ({
       color={color}
       size={size}
       onClick={onClick}
+      onClickCapture={onClickCapture} // Передаем onClickCapture в компонент
       className={className}
     >
       {label}

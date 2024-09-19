@@ -1,15 +1,33 @@
-import { AgentSource } from "./AgentSource"
+import { AgentSource } from "./AgentSource";
 
 import { Agent } from "./AgentSchema";
 
 export class AgentRepository {
-    private agents: Agent[];
+  private agentSource: AgentSource;
 
-    constructor(agentsSource: AgentSource) {
-        this.agents = agentsSource.getAgents();
-    }
+  constructor(agentSource: AgentSource) {
+    this.agentSource = agentSource;
+  }
 
-    getAgents() : Agent[] {
-        return this.agents;
-    }
+  private parse(agents: any[]): Agent[] {
+    return agents.map((agent) => ({
+      id: agent.Id,
+      image: agent.Image,
+      agentType: agent.AgentType,
+      name: agent.Name,
+      salesCount: agent.SalesCount,
+      phone: agent.Phone,
+      priority: agent.Priority,
+      discount: agent.Discount,
+      email: agent.Email,
+    }));
+  }
+
+  async getAgents(): Promise<Agent[]> {
+    return this.parse(await this.agentSource.getAgents());
+  }
+
+  async updateAgent(updatedAgent: Agent) {
+    this.agentSource.updateAgent(updatedAgent);
+  }
 }
