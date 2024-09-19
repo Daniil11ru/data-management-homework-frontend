@@ -26,6 +26,7 @@ import { AgentKey } from "./data/AgentSchema";
 import { SortOptions } from "./data/SortOptions";
 
 import { AppViewModel } from "./AppViewModel";
+import { AgentRepository } from "./data/AgentRepository";
 
 const darkTheme = createTheme({
   palette: {
@@ -35,7 +36,7 @@ const darkTheme = createTheme({
 
 const App: React.FC = () => {
   const {
-    agentTypes,
+    agentTypesMap,
     currentAgents,
     currentPage,
     totalPages,
@@ -47,23 +48,54 @@ const App: React.FC = () => {
     newPriority,
     sortOptions,
     filterOptions,
-    handleSearch,
-    handleTypeSelect,
-    handlePageChange,
-    handleSortSelect,
-    handleSortOrderChange,
-    handleCardClick,
-    handlePriorityChange,
+    getMaxPriorityOfSelectedAgents,
+    updatePriorityOfSelectedAgents,
     setChangeAgentsPriorityDialogOpen,
     setAddAgentDialogOpen,
     setChangeAgentDialogOpen,
     setPriority,
+    setSelectedAgents,
+    setSortCriteria,
+    setSortOrder,
+    setCurrentPage,
+    setSelectedType,
+    setSearchQuery
   } = AppViewModel();
+
+  const handlePageChange = (_: React.ChangeEvent<unknown>, page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleSearch = (query: string): void => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+  };
+
+  const handleTypeSelect = (type: string): void => {
+    setSelectedType(type);
+    setCurrentPage(1);
+  };
+
+  const handleSortSelect = (criteria: string) => {
+    setSortCriteria(criteria);
+    setCurrentPage(1);
+  };
+
+  const handleSortOrderChange = () => {
+    setSortOrder((prevOrder) =>
+      prevOrder === SortOptions.ASC ? SortOptions.DESC : SortOptions.ASC
+    );
+  };
+
+  const handlePriorityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPriority(parseInt(event.target.value));
+  };
 
   const handleOnChangeAgentClick = () => {
   };
 
   const handleOnChangeAgentsPriorityClick = () => {
+    setPriority(getMaxPriorityOfSelectedAgents());
     setChangeAgentsPriorityDialogOpen(true);
   };
 
@@ -72,7 +104,17 @@ const App: React.FC = () => {
 
   const handleConfirmAgentsPriorityChange = () => {
     setChangeAgentsPriorityDialogOpen(false);
+    updatePriorityOfSelectedAgents();
   };
+
+  const handleCardClick = (agentId: number) => {
+    setSelectedAgents((prevSelected) =>
+      prevSelected.includes(agentId)
+        ? prevSelected.filter((id) => id !== agentId)
+        : [...prevSelected, agentId]
+    );
+  };
+
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -171,7 +213,7 @@ const App: React.FC = () => {
                   <AgentCard
                     image={agent.image}
                     type={
-                      agentTypes.get(agent.agentType)?.title ||
+                      agentTypesMap.get(agent.agentType)?.title ||
                       "Неизвестный тип"
                     }
                     name={agent.name}

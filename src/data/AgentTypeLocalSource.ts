@@ -2,18 +2,12 @@ import { AgentType } from "./AgentTypeSchema";
 
 import { AgentTypeSource } from "./AgentTypeSource";
 
-import agentTypes from "./agentTypes.json";
-
 class AgentTypeLocalSource implements AgentTypeSource {
-  private parse(agentTypes: any[]): AgentType[] {
-    return agentTypes.map((agentType) => ({
-      id: agentType.Id,
-      title: agentType.Title,
-    }));
-  }
+  async getAgentTypes(): Promise<any[]> {
+    const response = await fetch('http://localhost:5000/agents/types');
+    const types = await response.json();
 
-  getAgentTypes(): AgentType[] {
-    return this.parse(agentTypes);
+    return types;
   }
 }
 

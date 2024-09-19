@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from "react";
-import { AgentKey } from "./data/AgentSchema";
+import { useState, useEffect } from "react";
+import { Agent, AgentKey } from "./data/AgentSchema";
+import { AgentType } from "./data/AgentTypeSchema";
 import { SortOptions } from "./data/SortOptions";
 import AgentLocalSource from "./data/AgentLocalSource";
 import { AgentRepository } from "./data/AgentRepository";
@@ -7,6 +8,13 @@ import AgentTypeLocalSource from "./data/AgentTypeLocalSource";
 import { AgentTypeRepository } from "./data/AgentTypeRepository";
 
 export const AppViewModel = () => {
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [agentTypes, setAgentTypes] = useState<AgentType[]>([]);
+  const [agentTypesMap, setAgentTypesMap] = useState<Map<number, AgentType>>(
+    new Map<number, AgentType>()
+  );
+  const [agentTypeTitles, setAgentTypeTitles] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>("Все");
@@ -22,12 +30,65 @@ export const AppViewModel = () => {
 
   const agentLocalSource = new AgentLocalSource();
   const agentRepository = new AgentRepository(agentLocalSource);
-  const agents = agentRepository.getAgents();
+  useEffect(() => {
+    const fetchAgents = async () => {
+      try {
+        const data = await agentRepository.getAgents();
+        setAgents(data);
+      } catch (error) {
+        console.error("Ошибка при получении агентов:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAgents();
+  }, []);
 
   const agentTypeLocalSource = new AgentTypeLocalSource();
   const agentTypeRepository = new AgentTypeRepository(agentTypeLocalSource);
-  const agentTypes = agentTypeRepository.getAgentTypesMap();
-  const titlesOfAgentTypes = agentTypeRepository.getTitles();
+  useEffect(() => {
+    const fetchAgentTypes = async () => {
+      try {
+        const data = await agentTypeRepository.getAgentTypes();
+        setAgentTypes(data);
+      } catch (error) {
+        console.error("Ошибка при получении типов агентов:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAgentTypes();
+  }, []);
+  useEffect(() => {
+    const fetchAgentTypesMap = async () => {
+      try {
+        const data = await agentTypeRepository.getAgentTypesMap();
+        setAgentTypesMap(data);
+      } catch (error) {
+        console.error("Ошибка при получении типов агентов:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAgentTypesMap();
+  }, []);
+  useEffect(() => {
+    const fetchAgentTypeTitles = async () => {
+      try {
+        const data = await agentTypeRepository.getTitles();
+        setAgentTypeTitles(data);
+      } catch (error) {
+        console.error("Ошибка при получении названий типов агентов:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAgentTypeTitles();
+  }, []);
 
   const filteredAgents = agents.filter((agent) => {
     const matchesSearch =
@@ -37,7 +98,8 @@ export const AppViewModel = () => {
 
     const matchesType =
       selectedType === "Все" ||
-      agent.agentType === agentTypeRepository.getId(selectedType);
+      agent.agentType ===
+        agentTypes.find((agentType) => agentType.title === selectedType)?.id;
 
     return matchesSearch && matchesType;
   });
@@ -73,50 +135,30 @@ export const AppViewModel = () => {
     { value: AgentKey.priority, label: "Приоритет" },
   ];
 
-  const filterOptions = ["Все", ...titlesOfAgentTypes].map((type) => ({
+  const filterOptions = ["Все", ...agentTypeTitles].map((type) => ({
     value: type,
     label: type,
   }));
 
-  const handleSearch = (query: string): void => {
-    setSearchQuery(query);
-    setCurrentPage(1);
-  };
+  const getMaxPriorityOfSelectedAgents = (): number => {
+    if (selectedAgents.length === 0) return 0;
 
-  const handleTypeSelect = (type: string): void => {
-    setSelectedType(type);
-    setCurrentPage(1);
-  };
-
-  const handlePageChange = (_: React.ChangeEvent<unknown>, page: number) => {
-    setCurrentPage(page);
-  };
-
-  const handleSortSelect = (criteria: string) => {
-    setSortCriteria(criteria);
-    setCurrentPage(1);
-  };
-
-  const handleSortOrderChange = () => {
-    setSortOrder((prevOrder) =>
-      prevOrder === SortOptions.ASC ? SortOptions.DESC : SortOptions.ASC
+    const selectedAgentObjects = agents.filter((agent) =>
+      selectedAgents.includes(agent.id)
     );
+
+    return Math.max(...selectedAgentObjects.map((agent) => agent.priority));
   };
 
-  const handleCardClick = (agentId: number) => {
-    setSelectedAgents((prevSelected) =>
-      prevSelected.includes(agentId)
-        ? prevSelected.filter((id) => id !== agentId)
-        : [...prevSelected, agentId]
-    );
+  const updatePriorityOfSelectedAgents = async () => {
+    for (let agentId of selectedAgents) {
+      agents[agentId].priority = newPriority;
+      agentRepository.updateAgent(agents[agentId]);
+    }
   };
 
-  const handlePriorityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPriority(parseInt(event.target.value));
-  };
-  
   return {
-    agentTypes,
+    agentTypesMap,
     currentAgents,
     currentPage,
     totalPages,
@@ -128,16 +170,17 @@ export const AppViewModel = () => {
     newPriority,
     sortOptions,
     filterOptions,
-    handleSearch,
-    handleTypeSelect,
-    handlePageChange,
-    handleSortSelect,
-    handleSortOrderChange,
-    handleCardClick,
-    handlePriorityChange,
+    getMaxPriorityOfSelectedAgents,
+    updatePriorityOfSelectedAgents,
     setChangeAgentsPriorityDialogOpen,
     setAddAgentDialogOpen,
     setChangeAgentDialogOpen,
     setPriority,
+    setSelectedAgents,
+    setSortCriteria,
+    setSortOrder,
+    setCurrentPage,
+    setSelectedType,
+    setSearchQuery,
   };
 };
