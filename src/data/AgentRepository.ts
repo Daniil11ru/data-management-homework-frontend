@@ -11,15 +11,21 @@ export class AgentRepository {
 
   private parse(agents: any[]): Agent[] {
     return agents.map((agent) => ({
-      id: agent.Id,
-      image: agent.Image,
+      id: agent.ID,
+      title: agent.Title,
+      address: agent.address,
+      INN: agent.INN,
+      KPP: agent.KPP,
+      directorName: agent.DirectorName,
+      agentTypeId: agent.AgentTypeID,
       agentType: agent.AgentType,
-      name: agent.Name,
       salesCount: agent.SalesCount,
       phone: agent.Phone,
       priority: agent.Priority,
       discount: agent.Discount,
       email: agent.Email,
+      logo: agent.Logo,
+      totalSales: agent.TotalSales,
     }));
   }
 

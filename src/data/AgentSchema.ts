@@ -2,28 +2,39 @@ import { z } from "zod";
 
 const AgentSchema = z.object({
   id: z.number(),
-  image: z.string(),
-  agentType: z.number(),
-  name: z.string(),
+  title: z.string(),
+  address: z.string(),
+  INN: z.string(),
+  KPP: z.string(),
+  directorName: z.string(),
+  agentTypeId: z.number(),
+  agentType: z.string(),
   salesCount: z.number(),
   phone: z.string(),
   priority: z.number(),
   discount: z.number(),
   email: z.string(),
+  logo: z.string(),
+  totalSales: z.number()
 });
 
 type Agent = z.infer<typeof AgentSchema>;
 
 const AgentKey = {
   id: "id",
-  image: "image",
-  agentType: "agentType",
-  name: "name",
+  logo: "logo",
+  agentTypeId: "agentTypeId",
+  title: "title",
   salesCount: "salesCount",
   phone: "phone",
   priority: "priority",
   discount: "discount",
   email: "email",
+  totalSales: "totalSales",
+  address: "address",
+  INN: "INN",
+  KPP: "KPP",
+  directorName: "directorName",
 }
 
 export { AgentSchema, AgentKey };

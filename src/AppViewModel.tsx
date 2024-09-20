@@ -4,7 +4,8 @@ import { AgentType } from "./data/AgentTypeSchema";
 import { SortOptions } from "./data/SortOptions";
 import AgentLocalSource from "./data/AgentLocalSource";
 import { AgentRepository } from "./data/AgentRepository";
-import AgentTypeLocalSource from "./data/AgentTypeLocalSource";
+import AgentRemoteSource  from "./data/AgentRemoteSource";
+import AgentTypeLocalSource from "./data/AgentTypeLocalSource"
 import { AgentTypeRepository } from "./data/AgentTypeRepository";
 
 export const AppViewModel = () => {
@@ -18,7 +19,7 @@ export const AppViewModel = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>("Все");
-  const [sortCriteria, setSortCriteria] = useState<string>(AgentKey.name);
+  const [sortCriteria, setSortCriteria] = useState<string>(AgentKey.title);
   const [sortOrder, setSortOrder] = useState<SortOptions>(SortOptions.ASC);
   const [selectedAgents, setSelectedAgents] = useState<number[]>([]);
   const [openChangeAgentsPriorityDialog, setChangeAgentsPriorityDialogOpen] =
@@ -28,8 +29,8 @@ export const AppViewModel = () => {
   const [openAddAgentDialog, setAddAgentDialogOpen] = useState(false);
   const [newPriority, setPriority] = useState<number>(0);
 
-  const agentLocalSource = new AgentLocalSource();
-  const agentRepository = new AgentRepository(agentLocalSource);
+  const agentRemoteSource = new AgentRemoteSource();
+  const agentRepository = new AgentRepository(agentRemoteSource);
   useEffect(() => {
     const fetchAgents = async () => {
       try {
@@ -92,23 +93,23 @@ export const AppViewModel = () => {
 
   const filteredAgents = agents.filter((agent) => {
     const matchesSearch =
-      agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      agent.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       agent.phone.includes(searchQuery) ||
       agent.email.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesType =
       selectedType === "Все" ||
-      agent.agentType ===
-        agentTypes.find((agentType) => agentType.title === selectedType)?.id;
+      agent.agentTypeId ===
+        agentTypes.find((agentTypeId) => agentTypeId.title === selectedType)?.id;
 
     return matchesSearch && matchesType;
   });
 
   const sortedAgents = [...filteredAgents].sort((a, b) => {
-    if (sortCriteria === AgentKey.name) {
+    if (sortCriteria === AgentKey.title) {
       return sortOrder === SortOptions.ASC
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name);
+        ? a.title.localeCompare(b.title)
+        : b.title.localeCompare(a.title);
     } else if (sortCriteria === AgentKey.discount) {
       return sortOrder === SortOptions.ASC
         ? a.discount - b.discount
@@ -130,7 +131,7 @@ export const AppViewModel = () => {
   );
 
   const sortOptions = [
-    { value: AgentKey.name, label: "Наименование" },
+    { value: AgentKey.title, label: "Наименование" },
     { value: AgentKey.discount, label: "Скидка" },
     { value: AgentKey.priority, label: "Приоритет" },
   ];
@@ -152,7 +153,9 @@ export const AppViewModel = () => {
 
   const updatePriorityOfSelectedAgents = async () => {
     for (let agentId of selectedAgents) {
+      console.log(agentId);
       agents[agentId].priority = newPriority;
+      console.log(agents[agentId]);
       agentRepository.updateAgent(agents[agentId]);
     }
   };

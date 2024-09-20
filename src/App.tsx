@@ -156,7 +156,7 @@ const App: React.FC = () => {
                       options={sortOptions}
                       onSelect={handleSortSelect}
                       placeholder="Порядок"
-                      defaultValue={AgentKey.name}
+                      defaultValue={AgentKey.title}
                       sx={{ width: 200 }}
                     />
                     <IconButton
@@ -211,12 +211,12 @@ const App: React.FC = () => {
               {currentAgents.map((agent, index) => (
                 <Grid2 key={index} size={{ xs: 6, sm: 4, md: 3 }}>
                   <AgentCard
-                    image={agent.image}
+                    image={"https://via.placeholder.com/200"}
                     type={
-                      agentTypesMap.get(agent.agentType)?.title ||
+                      agentTypesMap.get(agent.agentTypeId)?.title ||
                       "Неизвестный тип"
                     }
-                    name={agent.name}
+                    name={agent.title}
                     sales={agent.salesCount}
                     phone={agent.phone}
                     priority={agent.priority}
