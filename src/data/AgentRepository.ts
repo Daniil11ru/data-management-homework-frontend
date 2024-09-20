@@ -13,7 +13,7 @@ export class AgentRepository {
     return agents.map((agent) => ({
       id: agent.ID,
       title: agent.Title,
-      address: agent.address,
+      address: agent.Address,
       INN: agent.INN,
       KPP: agent.KPP,
       directorName: agent.DirectorName,

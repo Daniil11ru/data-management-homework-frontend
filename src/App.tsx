@@ -26,7 +26,6 @@ import { AgentKey } from "./data/AgentSchema";
 import { SortOptions } from "./data/SortOptions";
 
 import { AppViewModel } from "./AppViewModel";
-import { AgentRepository } from "./data/AgentRepository";
 
 const darkTheme = createTheme({
   palette: {

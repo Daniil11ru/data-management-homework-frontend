@@ -3,8 +3,7 @@ import { AgentSource } from "./AgentSource";
 
 class AgentRemoteSource implements AgentSource {
   async getAgents(): Promise<any[]> { 
-    const response = await fetch('http://localhost:8080/api/agents');
-    console.log(response);
+    const response = await fetch('http://89.110.118.205/api/agents');
     const agents = await response.json();
 
     return agents;
@@ -42,7 +41,7 @@ class AgentRemoteSource implements AgentSource {
     }
  
     try {
-      const response = await fetch(`http://localhost:8080/agents/update/${agent.id}`, {
+      const response = await fetch(`http://89.110.118.205/agents/update/${agent.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

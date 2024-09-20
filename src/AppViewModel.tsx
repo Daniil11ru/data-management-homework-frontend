@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Agent, AgentKey } from "./data/AgentSchema";
 import { AgentType } from "./data/AgentTypeSchema";
 import { SortOptions } from "./data/SortOptions";
-import AgentLocalSource from "./data/AgentLocalSource";
 import { AgentRepository } from "./data/AgentRepository";
 import AgentRemoteSource  from "./data/AgentRemoteSource";
 import AgentTypeLocalSource from "./data/AgentTypeLocalSource"
@@ -15,7 +14,6 @@ export const AppViewModel = () => {
     new Map<number, AgentType>()
   );
   const [agentTypeTitles, setAgentTypeTitles] = useState<string[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>("Все");
@@ -38,8 +36,6 @@ export const AppViewModel = () => {
         setAgents(data);
       } catch (error) {
         console.error("Ошибка при получении агентов:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -55,8 +51,6 @@ export const AppViewModel = () => {
         setAgentTypes(data);
       } catch (error) {
         console.error("Ошибка при получении типов агентов:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -69,8 +63,6 @@ export const AppViewModel = () => {
         setAgentTypesMap(data);
       } catch (error) {
         console.error("Ошибка при получении типов агентов:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -83,8 +75,6 @@ export const AppViewModel = () => {
         setAgentTypeTitles(data);
       } catch (error) {
         console.error("Ошибка при получении названий типов агентов:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -152,10 +142,23 @@ export const AppViewModel = () => {
   };
 
   const updatePriorityOfSelectedAgents = async () => {
+    console.log(selectedAgents);
+
+    const newAgents = agents.map((agent) => {
+      console.log(agent.id);
+      if (selectedAgents.includes(agent.id)) {
+        console.log(agent.id, selectedAgents)
+        const newAgent = agent;
+        newAgent.priority = newPriority;
+        return newAgent;
+      } 
+      else {
+        return agent;
+      }
+    });
+    setAgents(newAgents);
+
     for (let agentId of selectedAgents) {
-      console.log(agentId);
-      agents[agentId].priority = newPriority;
-      console.log(agents[agentId]);
       agentRepository.updateAgent(agents[agentId]);
     }
   };
