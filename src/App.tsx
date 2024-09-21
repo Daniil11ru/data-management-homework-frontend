@@ -35,7 +35,7 @@ const darkTheme = createTheme({
 
 const App: React.FC = () => {
   const {
-    agentTypesMap,
+    agentTypeIdToTitle,
     currentAgents,
     currentPage,
     totalPages,
@@ -213,7 +213,7 @@ const App: React.FC = () => {
                     // image={ agent.logo || "https://via.placeholder.com/200" }
                     image={"https://via.placeholder.com/200"}
                     type={
-                      agentTypesMap.get(agent.agentTypeId)?.title ||
+                      agentTypeIdToTitle.get(agent.agentTypeId) ||
                       "Неизвестный тип"
                     }
                     name={agent.title}

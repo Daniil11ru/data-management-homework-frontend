@@ -3,16 +3,16 @@ import { Agent, AgentKey } from "./data/AgentSchema";
 import { AgentType } from "./data/AgentTypeSchema";
 import { SortOptions } from "./data/SortOptions";
 import { AgentRepository } from "./data/AgentRepository";
-import AgentRemoteSource  from "./data/AgentRemoteSource";
-import AgentTypeRemoteSource from "./data/AgentTypeRemoteSource"
+import AgentRemoteSource from "./data/AgentRemoteSource";
+import AgentTypeRemoteSource from "./data/AgentTypeRemoteSource";
 import { AgentTypeRepository } from "./data/AgentTypeRepository";
 
 export const AppViewModel = () => {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [agentTypes, setAgentTypes] = useState<AgentType[]>([]);
-  const [agentTypesMap, setAgentTypesMap] = useState<Map<number, AgentType>>(
-    new Map<number, AgentType>()
-  );
+  const [agentTypeIdToTitle, setAgentTypeIdToTitle] = useState<
+    Map<number, string>
+  >(new Map<number, string>());
   const [agentTypeTitles, setAgentTypeTitles] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -49,36 +49,21 @@ export const AppViewModel = () => {
       try {
         const data = await agentTypeRepository.getAgentTypes();
         setAgentTypes(data);
+
+        setAgentTypeIdToTitle(
+          data.reduce((map, agentType) => {
+            map.set(agentType.id, agentType.title);
+            return map;
+          }, new Map<number, string>())
+        );
+
+        setAgentTypeTitles(data.map((agentType) => agentType.title));
       } catch (error) {
         console.error("Ошибка при получении типов агентов:", error);
       }
     };
 
     fetchAgentTypes();
-  }, []);
-  useEffect(() => {
-    const fetchAgentTypesMap = async () => {
-      try {
-        const data = await agentTypeRepository.getAgentTypesMap();
-        setAgentTypesMap(data);
-      } catch (error) {
-        console.error("Ошибка при получении типов агентов:", error);
-      }
-    };
-
-    fetchAgentTypesMap();
-  }, []);
-  useEffect(() => {
-    const fetchAgentTypeTitles = async () => {
-      try {
-        const data = await agentTypeRepository.getTitles();
-        setAgentTypeTitles(data);
-      } catch (error) {
-        console.error("Ошибка при получении названий типов агентов:", error);
-      }
-    };
-
-    fetchAgentTypeTitles();
   }, []);
 
   const filteredAgents = agents.filter((agent) => {
@@ -90,7 +75,8 @@ export const AppViewModel = () => {
     const matchesType =
       selectedType === "Все" ||
       agent.agentTypeId ===
-        agentTypes.find((agentTypeId) => agentTypeId.title === selectedType)?.id;
+        agentTypes.find((agentTypeId) => agentTypeId.title === selectedType)
+          ?.id;
 
     return matchesSearch && matchesType;
   });
@@ -147,8 +133,7 @@ export const AppViewModel = () => {
         const newAgent = agent;
         newAgent.priority = newPriority;
         return newAgent;
-      } 
-      else {
+      } else {
         return agent;
       }
     });
@@ -160,7 +145,7 @@ export const AppViewModel = () => {
   };
 
   return {
-    agentTypesMap,
+    agentTypeIdToTitle,
     currentAgents,
     currentPage,
     totalPages,

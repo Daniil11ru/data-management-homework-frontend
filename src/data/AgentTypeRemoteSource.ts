@@ -13,7 +13,6 @@ class AgentTypeRemoteSource extends AgentTypeSource {
   async getAgentTypes(): Promise<AgentType[]> {
     const response = await fetch("http://89.110.118.205/api/agent-types");
     const agentTypes = await response.json();
-    console.log(agentTypes);
     return agentTypes.map((agentType: any) => this.parse(agentType));
   }
 }
