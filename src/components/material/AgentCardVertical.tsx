@@ -5,7 +5,7 @@ import SellIcon from "@mui/icons-material/Sell";
 import StarIcon from "@mui/icons-material/Star";
 import { teal } from "@mui/material/colors";
 
-import { lighten } from '@mui/system'; 
+import { lighten } from "@mui/system";
 
 import { AgentCardSelectableProps } from "./AgentCard.types";
 
@@ -27,7 +27,9 @@ const AgentCardVertical: React.FC<AgentCardSelectableProps> = ({
         borderRadius: 2,
         boxShadow: 3,
         cursor: "pointer",
-        backgroundColor: isSelected ? lighten(theme.palette.background.paper, 0.1) : theme.palette.background.paper,
+        backgroundColor: isSelected
+          ? lighten(theme.palette.background.paper, 0.1)
+          : theme.palette.background.paper,
         transition: "background-color 0.2s ease",
       })}
       onClick={onClick}
@@ -42,25 +44,35 @@ const AgentCardVertical: React.FC<AgentCardSelectableProps> = ({
         <Box
           sx={{
             display: "flex",
+            flexDirection: "column",
             justifyContent: "space-between",
             width: "100%",
           }}
         >
-          <Box>
-            <Typography variant="h6" fontWeight="bold">
+          <Box display="flex" flexDirection="row" justifyContent="space-between">
+            <Typography
+              variant="h6"
+              fontWeight="bold"
+              sx={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: "85%",
+              }}
+            >
               {name}
             </Typography>
-            <Typography variant="subtitle1" color="text.secondary">
-              {type}
+            <Typography
+              variant="h6"
+              sx={(theme) => ({
+                color: discount > 25 ? teal[200] : theme.palette.primary.main,
+              })}
+            >
+              {`${discount}%`}
             </Typography>
           </Box>
-          <Typography
-            variant="h6"
-            sx={(theme) => ({
-              color: discount > 25 ? teal[200] : theme.palette.primary.main,
-            })}
-          >
-            {`${discount}%`}
+          <Typography variant="subtitle1" color="text.secondary">
+            {type}
           </Typography>
         </Box>
 

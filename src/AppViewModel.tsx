@@ -142,12 +142,8 @@ export const AppViewModel = () => {
   };
 
   const updatePriorityOfSelectedAgents = async () => {
-    console.log(selectedAgents);
-
     const newAgents = agents.map((agent) => {
-      console.log(agent.id);
       if (selectedAgents.includes(agent.id)) {
-        console.log(agent.id, selectedAgents)
         const newAgent = agent;
         newAgent.priority = newPriority;
         return newAgent;

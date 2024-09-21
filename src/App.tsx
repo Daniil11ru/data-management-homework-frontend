@@ -210,6 +210,7 @@ const App: React.FC = () => {
               {currentAgents.map((agent, index) => (
                 <Grid2 key={index} size={{ xs: 6, sm: 4, md: 3 }}>
                   <AgentCard
+                    // image={ agent.logo || "https://via.placeholder.com/200" }
                     image={"https://via.placeholder.com/200"}
                     type={
                       agentTypesMap.get(agent.agentTypeId)?.title ||
