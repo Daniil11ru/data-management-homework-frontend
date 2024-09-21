@@ -1,37 +1,43 @@
 import { Agent } from "./AgentSchema";
 import { AgentSource } from "./AgentSource";
+import { capitalizeKeys } from "./Utils";
 
-class AgentLocalSource implements AgentSource {
-  async getAgents(): Promise<any[]> { 
+class AgentLocalSource extends AgentSource {
+  private parse(agent: any): Agent {
+    return {
+      id: agent.Id,
+      title: agent.Name,
+      address: agent.Address,
+      INN: agent.INN,
+      KPP: agent.KPP,
+      directorName: agent.DirectorName,
+      agentTypeId: agent.AgentTypeID,
+      agentTypeTitle: agent.AgentTypeTitle,
+      salesCount: agent.SalesCount,
+      phone: agent.Phone,
+      priority: agent.Priority,
+      discount: agent.Discount,
+      email: agent.Email,
+      logo: agent.Image,
+      totalSales: agent.TotalSales,
+    };
+  }
+
+  async getAgents(): Promise<Agent[]> { 
     const response = await fetch('http://localhost:5000/agents');
     const agents = await response.json();
 
-    return agents;
+    return agents.map((agent: any) => this.parse(agent));
   }
 
-  private capitalizeKeys = (obj: any): any => {
-    const newObj: any = {};
-  
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
-        newObj[capitalizedKey] = obj[key];
-      }
-    }
-  
-    return newObj;
-  };
-
   async updateAgent(agent: Agent) {
-    console.log(this.capitalizeKeys(agent));
-
     try {
       const response = await fetch(`http://localhost:5000/agents/update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(this.capitalizeKeys(agent)),
+        body: JSON.stringify(capitalizeKeys(agent)),
       });
   
       if (!response.ok) {

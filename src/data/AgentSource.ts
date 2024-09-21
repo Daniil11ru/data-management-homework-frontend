@@ -1,6 +1,6 @@
 import { Agent } from "./AgentSchema";
 
-export interface AgentSource {
-    getAgents(): Promise<any[]>
-    updateAgent(updatedAgent: Agent): Promise<void>
+export abstract class AgentSource {
+    abstract getAgents(): Promise<Agent[]>
+    abstract updateAgent(updatedAgent: Agent): Promise<void>
 }

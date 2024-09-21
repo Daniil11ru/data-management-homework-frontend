@@ -9,15 +9,8 @@ export class AgentTypeRepository {
     this.agentTypeSource = agentTypeSource;
   }
 
-  private parse(agentTypes: any[]): AgentType[] {
-    return agentTypes.map((agentType) => ({
-      id: agentType.Id,
-      title: agentType.Title,
-    }));
-  }
-
   async getAgentTypes(): Promise<AgentType[]> {
-    return this.parse(await this.agentTypeSource.getAgentTypes());
+    return (await this.agentTypeSource.getAgentTypes());
   }
 
   async getAgentTypesMap(): Promise<Map<number, AgentType>> {

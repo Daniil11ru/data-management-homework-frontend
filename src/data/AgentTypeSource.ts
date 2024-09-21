@@ -1,5 +1,5 @@
 import { AgentType } from "./AgentTypeSchema";
 
-export interface AgentTypeSource {
-    getAgentTypes(): Promise<any[]>
+export abstract class AgentTypeSource {
+    abstract getAgentTypes(): Promise<AgentType[]>
 }

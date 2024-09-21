@@ -1,26 +1,33 @@
 import { Agent, AgentKey } from "./AgentSchema";
 import { AgentSource } from "./AgentSource";
 
-class AgentRemoteSource implements AgentSource {
-  async getAgents(): Promise<any[]> { 
+class AgentRemoteSource extends AgentSource {
+  private parse(agent: any): Agent {
+    return {
+      id: agent.ID,
+      title: agent.Title,
+      address: agent.Address,
+      INN: agent.INN,
+      KPP: agent.KPP,
+      directorName: agent.DirectorName,
+      agentTypeId: agent.AgentTypeID,
+      agentTypeTitle: agent.AgentType,
+      salesCount: agent.SalesCount,
+      phone: agent.Phone,
+      priority: agent.Priority,
+      discount: agent.Discount,
+      email: agent.Email,
+      logo: agent.Logo,
+      totalSales: agent.TotalSales,
+    };
+  }
+
+  async getAgents(): Promise<Agent[]> { 
     const response = await fetch('http://89.110.118.205/api/agents');
     const agents = await response.json();
 
-    return agents;
+    return agents.map((agent: any) => this.parse(agent));
   }
-
-  private capitalizeKeys = (obj: any): any => {
-    const newObj: any = {};
-  
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
-        newObj[capitalizedKey] = obj[key];
-      }
-    }
-  
-    return newObj;
-  };
 
   async updateAgent(agent: Agent) {
     const agentWithoutId = Object.fromEntries(

@@ -2,19 +2,20 @@ import { AgentType } from "./AgentTypeSchema";
 
 import { AgentTypeSource } from "./AgentTypeSource";
 
-class AgentTypeLocalSource extends AgentTypeSource {
+class AgentTypeRemoteSource extends AgentTypeSource {
   private parse(agentType: any): AgentType {
     return {
-        id: agentType.Id,
+        id: agentType.ID,
         title: agentType.Title
     }
   }
 
-  async getAgentTypes(): Promise<any[]> {
-    const response = await fetch('http://localhost:5000/agents/types');
+  async getAgentTypes(): Promise<AgentType[]> {
+    const response = await fetch("http://89.110.118.205/api/agent-types");
     const agentTypes = await response.json();
+    console.log(agentTypes);
     return agentTypes.map((agentType: any) => this.parse(agentType));
   }
 }
 
-export default AgentTypeLocalSource;
+export default AgentTypeRemoteSource;

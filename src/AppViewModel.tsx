@@ -4,7 +4,7 @@ import { AgentType } from "./data/AgentTypeSchema";
 import { SortOptions } from "./data/SortOptions";
 import { AgentRepository } from "./data/AgentRepository";
 import AgentRemoteSource  from "./data/AgentRemoteSource";
-import AgentTypeLocalSource from "./data/AgentTypeLocalSource"
+import AgentTypeRemoteSource from "./data/AgentTypeRemoteSource"
 import { AgentTypeRepository } from "./data/AgentTypeRepository";
 
 export const AppViewModel = () => {
@@ -42,8 +42,8 @@ export const AppViewModel = () => {
     fetchAgents();
   }, []);
 
-  const agentTypeLocalSource = new AgentTypeLocalSource();
-  const agentTypeRepository = new AgentTypeRepository(agentTypeLocalSource);
+  const agentTypeRemoteSource = new AgentTypeRemoteSource();
+  const agentTypeRepository = new AgentTypeRepository(agentTypeRemoteSource);
   useEffect(() => {
     const fetchAgentTypes = async () => {
       try {
