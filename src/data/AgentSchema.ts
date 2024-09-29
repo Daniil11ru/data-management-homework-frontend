@@ -8,7 +8,6 @@ const AgentSchema = z.object({
   KPP: z.string(),
   directorName: z.string(),
   agentTypeId: z.number(),
-  agentTypeTitle: z.string(),
   salesCount: z.number(),
   phone: z.string(),
   priority: z.number(),
@@ -17,14 +16,15 @@ const AgentSchema = z.object({
   logo: z.string(),
   totalSales: z.number()
 });
-
 type Agent = z.infer<typeof AgentSchema>;
+
+const AgentWithoutIdSchema = AgentSchema.omit({ id: true });
+type AgentWithoutId = z.infer<typeof AgentWithoutIdSchema>;
 
 const AgentKey = {
   id: "id",
   logo: "logo",
   agentTypeId: "agentTypeId",
-  agentTypeTitle: "agentTypeTile",
   title: "title",
   salesCount: "salesCount",
   phone: "phone",
@@ -38,5 +38,5 @@ const AgentKey = {
   directorName: "directorName",
 }
 
-export { AgentSchema, AgentKey };
-export type { Agent };
+export { AgentSchema, AgentWithoutIdSchema, AgentKey };
+export type { Agent, AgentWithoutId };

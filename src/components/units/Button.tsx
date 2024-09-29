@@ -8,6 +8,7 @@ interface ButtonProps {
   variant?: 'text' | 'outlined' | 'contained';
   color?: 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
   size?: 'small' | 'medium' | 'large';
+  endIcon?: React.ReactNode;
   className?: string;
 }
 
@@ -18,6 +19,7 @@ const Button: React.FC<ButtonProps> = ({
   variant = 'contained',
   color = 'primary',
   size = 'medium',
+  endIcon,
   className,
 }) => {
   return (
@@ -25,6 +27,7 @@ const Button: React.FC<ButtonProps> = ({
       variant={variant}
       color={color}
       size={size}
+      endIcon={endIcon}
       onClick={onClick}
       onClickCapture={onClickCapture} // Передаем onClickCapture в компонент
       className={className}

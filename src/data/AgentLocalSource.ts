@@ -1,7 +1,10 @@
+// @ts-nocheck
+
 import { Agent } from "./AgentSchema";
 import { AgentSource } from "./AgentSource";
 import { capitalizeKeys } from "./Utils";
 
+// @deprecated
 class AgentLocalSource extends AgentSource {
   private parse(agent: any): Agent {
     return {
@@ -23,8 +26,15 @@ class AgentLocalSource extends AgentSource {
     };
   }
 
-  async getAgents(): Promise<Agent[]> { 
-    const response = await fetch('http://localhost:5000/agents');
+  async getAgent(id: number): Promise<Agent> {
+    const response = await fetch(`http://localhost:5000/agent/${id}`);
+    const agent = await response.json();
+
+    return this.parse(agent);
+  }
+
+  async getAgents(): Promise<Agent[]> {
+    const response = await fetch("http://localhost:5000/agents");
     const agents = await response.json();
 
     return agents.map((agent: any) => this.parse(agent));
@@ -33,24 +43,23 @@ class AgentLocalSource extends AgentSource {
   async updateAgent(agent: Agent) {
     try {
       const response = await fetch(`http://localhost:5000/agents/update`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(capitalizeKeys(agent)),
       });
-  
+
       if (!response.ok) {
         throw new Error(`Ошибка обновления агента: ${response.status}`);
       }
-  
+
       const result = await response.json();
-      console.log('Агент обновлен:', result);
+      console.log("Агент обновлен:", result);
     } catch (error) {
-      console.error('Ошибка:', error);
+      console.error("Ошибка:", error);
     }
   }
-  
 }
 
 export default AgentLocalSource;

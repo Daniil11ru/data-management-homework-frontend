@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { Agent, AgentKey } from "./data/AgentSchema";
-import { AgentType } from "./data/AgentTypeSchema";
-import { SortOptions } from "./data/SortOptions";
-import { AgentRepository } from "./data/AgentRepository";
-import AgentRemoteSource from "./data/AgentRemoteSource";
-import AgentTypeRemoteSource from "./data/AgentTypeRemoteSource";
-import { AgentTypeRepository } from "./data/AgentTypeRepository";
+import { Agent, AgentKey } from "../../data/AgentSchema";
+import { AgentType } from "../../data/AgentTypeSchema";
+import { SortOptions } from "../../data/SortOptions";
+import { AgentRepository } from "../../data/AgentRepository";
+import AgentRemoteSource from "../../data/AgentRemoteSource";
+import AgentTypeRemoteSource from "../../data/AgentTypeRemoteSource";
+import { AgentTypeRepository } from "../../data/AgentTypeRepository";
 
 export const AppViewModel = () => {
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -22,9 +22,6 @@ export const AppViewModel = () => {
   const [selectedAgents, setSelectedAgents] = useState<number[]>([]);
   const [openChangeAgentsPriorityDialog, setChangeAgentsPriorityDialogOpen] =
     useState<boolean>(false);
-  const [openChangeAgentDialog, setChangeAgentDialogOpen] =
-    useState<boolean>(false);
-  const [openAddAgentDialog, setAddAgentDialogOpen] = useState(false);
   const [newPriority, setPriority] = useState<number>(0);
 
   const agentRemoteSource = new AgentRemoteSource();
@@ -139,8 +136,10 @@ export const AppViewModel = () => {
     });
     setAgents(newAgents);
 
-    for (let agentId of selectedAgents) {
-      agentRepository.updateAgent(agents[agentId]);
+    for (let agent of newAgents) {
+      if (selectedAgents.includes(agent.id)) {
+        agentRepository.updateAgent(agent);
+      }
     }
   };
 
@@ -152,16 +151,12 @@ export const AppViewModel = () => {
     sortOrder,
     selectedAgents,
     openChangeAgentsPriorityDialog,
-    openChangeAgentDialog,
-    openAddAgentDialog,
     newPriority,
     sortOptions,
     filterOptions,
     getMaxPriorityOfSelectedAgents,
     updatePriorityOfSelectedAgents,
     setChangeAgentsPriorityDialogOpen,
-    setAddAgentDialogOpen,
-    setChangeAgentDialogOpen,
     setPriority,
     setSelectedAgents,
     setSortCriteria,

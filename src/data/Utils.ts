@@ -1,3 +1,26 @@
+import { Sale } from "./SaleSchema";
+
+export enum SaleOperationType {
+  ADD,
+  DELETE,
+}
+
+export class SaleOperation {
+  type: SaleOperationType;
+  sale: Sale;
+  productId: number;
+  constructor(type: SaleOperationType, sale: Sale, productId: number) {
+    this.type = type;
+    this.sale = sale;
+    this.productId = productId;
+  }
+}
+
+export enum SaleSource {
+  REMOTE,
+  LOCAL,
+}
+
 export const capitalizeKeys = (obj: any): any => {
   const newObj: any = {};
 

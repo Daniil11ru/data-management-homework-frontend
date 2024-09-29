@@ -1,6 +1,7 @@
 {
-    "rules": {
-      "react/no-is-mounted": "off"
-    }
-  }
-  
+  "rules": {
+    "react/no-is-mounted": "off"
+  },
+  "plugins": ["jsdoc"],
+  "extends": ["plugin:jsdoc/recommended"]
+}

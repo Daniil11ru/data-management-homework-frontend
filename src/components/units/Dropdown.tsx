@@ -11,12 +11,15 @@ interface DropdownProps {
 }
 
 const Dropdown: React.FC<DropdownProps> = ({ options, onSelect, defaultValue, placeholder = 'Выберите...', className, sx }) => {
-  const [selectedValue, setSelectedValue] = React.useState<string>(defaultValue === undefined ? '' : defaultValue);
+  const [selectedValue, setSelectedValue] = React.useState<string>(defaultValue || '');
 
   const handleChange = (event: SelectChangeEvent<string>) => {
     const value = event.target.value;
-    setSelectedValue(value);
-    onSelect(value);
+
+    if (value) {
+      setSelectedValue(value);
+      onSelect(value);
+    }
   };
 
   return (

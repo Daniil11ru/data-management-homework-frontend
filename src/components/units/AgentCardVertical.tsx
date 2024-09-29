@@ -65,7 +65,7 @@ const AgentCardVertical: React.FC<AgentCardSelectableProps> = ({
             <Typography
               variant="h6"
               sx={(theme) => ({
-                color: discount > 25 ? teal[200] : theme.palette.primary.main,
+                color: discount >= 25 ? teal[200] : theme.palette.primary.main,
               })}
             >
               {`${discount}%`}
