@@ -108,7 +108,7 @@ const App: React.FC = () => {
     setChangeAgentsPriorityDialogOpen(true);
   };
 
-  const handleOnAddAgentClick = () => {};
+  const handleOnAddAgentClick = () => { navigate(`/add-agent/`); };
 
   const handleConfirmAgentsPriorityChange = () => {
     setChangeAgentsPriorityDialogOpen(false);

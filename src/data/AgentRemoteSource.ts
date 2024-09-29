@@ -98,7 +98,18 @@ class AgentRemoteSource extends AgentSource {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(agent),
+        body: JSON.stringify({
+          name: agent.title,
+          agent_type: agent.agentTypeId,
+          address: agent.address,
+          inn: agent.INN,
+          kpp: agent.KPP,
+          director_name: agent.directorName,
+          phone: agent.phone,
+          priority: agent.priority,
+          email: agent.email,
+          logo: agent.logo,
+        }),
       });
 
       if (!response.ok) {

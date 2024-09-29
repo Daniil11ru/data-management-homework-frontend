@@ -51,10 +51,12 @@ interface AgentFormProps {
   agentTypeDropdownOptions: { value: string; label: string }[];
   products: Product[];
   submitButtonTitle: string;
+  submitButtonIcon?: React.ReactNode;
   handleFormSubmit: (
     updatedAgent: Agent,
     salesOperations: SaleOperation[]
   ) => void;
+  formPurpose: "add" | "edit";
   onDeleteClick?: () => void;
   agentInfo?: { agent: Agent; agentSales: Sale[] };
 }
@@ -63,7 +65,9 @@ const AgentForm: React.FC<AgentFormProps> = ({
   agentTypeDropdownOptions,
   products,
   submitButtonTitle,
+  submitButtonIcon,
   handleFormSubmit,
+  formPurpose,
   onDeleteClick,
   agentInfo,
 }) => {
@@ -88,23 +92,43 @@ const AgentForm: React.FC<AgentFormProps> = ({
   const [salesOperations, setSalesOperations] = useState<SaleOperation[]>([]);
 
   useEffect(() => {
-    if (agentInfo && agentInfo.agentSales) {
-      setAgent(agentInfo.agent);
-      setAgentDefault(agentInfo.agent);
-      const salesWithSource = agentInfo.agentSales.map((sale) => ({
-        ...sale,
-        productId: productTitleToProductId.get(sale.product) ?? -1,
-        source: SaleSource.REMOTE,
-      }));
-      setAgentSales(salesWithSource);
-      setAgentSalesDefault(salesWithSource);
+    if (formPurpose === "edit") {
+      if (agentInfo && agentInfo.agentSales) {
+        setAgent(agentInfo.agent);
+        setAgentDefault(agentInfo.agent);
+        const salesWithSource = agentInfo.agentSales.map((sale) => ({
+          ...sale,
+          productId: productTitleToProductId.get(sale.product) ?? -1,
+          source: SaleSource.REMOTE,
+        }));
+        setAgentSales(salesWithSource);
+        setAgentSalesDefault(salesWithSource);
 
-      const productMap = new Map<string, number>();
-      products.forEach((product) => {
-        productMap.set(product.title, product.id);
+        const productMap = new Map<string, number>();
+        products.forEach((product) => {
+          productMap.set(product.title, product.id);
+        });
+        setProductTitleToProductId(productMap);
+
+        setLoading(false);
+      }
+    } else {
+      setAgent({
+        id: -1,
+        logo: "",
+        agentTypeId: agentTypeDropdownOptions.length > 0 ? Number(agentTypeDropdownOptions[0].value) : -1,
+        title: "Агент",
+        salesCount: 0,
+        phone: "",
+        priority: 0,
+        discount: 0,
+        email: "",
+        totalSales: 0,
+        address: "",
+        INN: "",
+        KPP: "",
+        directorName: "",
       });
-      setProductTitleToProductId(productMap);
-
       setLoading(false);
     }
   }, [agentInfo, products]);
@@ -194,7 +218,11 @@ const AgentForm: React.FC<AgentFormProps> = ({
       }
     } else {
       salesOperations.push(
-        new SaleOperation(SaleOperationType.DELETE, agentSales[index], newSale.productId)
+        new SaleOperation(
+          SaleOperationType.DELETE,
+          agentSales[index],
+          newSale.productId
+        )
       );
     }
 
@@ -269,11 +297,11 @@ const AgentForm: React.FC<AgentFormProps> = ({
             variant="text"
             color="success"
             size="medium"
-            endIcon={<SaveOutlined />}
+            endIcon={submitButtonIcon ? submitButtonIcon : <SaveOutlined />}
           >
             {submitButtonTitle}
           </Button>
-          {agentInfo && (
+          {formPurpose === "edit" && agentInfo && (
             <Button
               type="reset"
               variant="text"
@@ -285,7 +313,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
             </Button>
           )}
           {/* FIXME: кнопка удаления становится на миг доступна при загрузке, даже если у агента есть продажи */}
-          {onDeleteClick && agentInfo && (
+          {formPurpose === "edit" && onDeleteClick && agentInfo && (
             <Button
               variant="text"
               color="error"
@@ -352,14 +380,27 @@ const AgentForm: React.FC<AgentFormProps> = ({
 
             <Box display="flex" flexDirection="column" gap={2} width="50%">
               {/* NOTE: условие нужно для того, чтобы значение по умолчанию успевало загрузиться до рендеринга компонента, без условия оно не будет отображено даже после загрузки */}
-              {agentTypeDropdownOptions.length > 0 && agent && (
-                <Dropdown
-                  options={agentTypeDropdownOptions}
-                  onSelect={handleSelectChange}
-                  placeholder="Тип"
-                  defaultValue={String(agent?.agentTypeId)}
-                />
-              )}
+              {formPurpose === "edit" &&
+                agentTypeDropdownOptions.length > 0 &&
+                agent && (
+                  <Dropdown
+                    options={agentTypeDropdownOptions}
+                    onSelect={handleSelectChange}
+                    placeholder="Тип"
+                    defaultValue={String(agent?.agentTypeId)}
+                  />
+                )}
+
+              {formPurpose === "add" &&
+                agentTypeDropdownOptions &&
+                agentTypeDropdownOptions.length > 0 && (
+                  <Dropdown
+                    options={agentTypeDropdownOptions}
+                    onSelect={handleSelectChange}
+                    placeholder="Тип"
+                    defaultValue={agentTypeDropdownOptions[0].value}
+                  />
+                )}
 
               <TextField
                 label="Имя директора"

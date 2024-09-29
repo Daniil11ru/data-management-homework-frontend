@@ -5,62 +5,36 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { CssBaseline, Container, Box } from "@mui/material";
 
-import { EditAgentViewModel } from "./EditAgentViewModel";
+import { AddAgentViewModel } from "./AddAgentViewModel";
 import AgentForm from "../forms/AgentForm";
 import { Agent } from "../../data/AgentSchema";
-import { Sale } from "../../data/SaleSchema";
 import { SaleOperation, SaleOperationType } from "../../data/Utils";
 import BreadcrumbNav from "../units/BreadcrumbNav";
+import { AddOutlined } from "@mui/icons-material";
 
 const EditAgent: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const {
-    setError,
-    agent,
-    setAgent,
-    updateAgent,
-    deleteAgent,
-    agentTypes,
-    agentTypeDropdownOptions,
-    agentSales,
-    addSale,
-    deleteSale,
-    products,
-  } = EditAgentViewModel(Number(id));
+  const { setError, addAgent, agentTypeDropdownOptions, addSale, products } =
+    AddAgentViewModel(Number(id));
 
   const navigate = useNavigate();
 
-  const handleAgentDelete = async () => {
-    try {
-      await deleteAgent(Number(id));
-      navigate("/");
-    } catch (err) {
-      console.error("Ошибка при удалении агента:", err);
-      setError("Не удалось удалить агента");
-    }
-  };
-
   const handleFormSubmit = async (
-    updatedAgent: Agent,
+    agent: Agent,
     salesOperations: SaleOperation[]
   ) => {
-    setAgent(updatedAgent);
-
     try {
+      console.log(agent);
+      await addAgent(agent);
       for (const operation of salesOperations) {
-        if (operation.type === SaleOperationType.DELETE) {
-          // TODO: реализовать
-          // deleteSale(operation.sale.id);
-        } else {
-          addSale(updatedAgent.id, operation.sale, operation.productId);
+        if (operation.type === SaleOperationType.ADD) {
+          addSale(agent.id, operation.sale, operation.productId);
         }
       }
-
-      await updateAgent(updatedAgent);
       navigate("/");
     } catch (err) {
-      console.error("Ошибка при обновлении агента:", err);
-      setError("Не удалось обновить агента");
+      console.error("Ошибка при добавлении агента:", err);
+      setError("Не удалось добавить агента");
     }
   };
 
@@ -89,7 +63,7 @@ const EditAgent: React.FC = () => {
 
   const breadcrumbs = [
     { label: "Агенты", path: "/" },
-    { label: agent?.title || "Редактирование агента" },
+    { label: "Новый агент" },
   ];
 
   return (
@@ -101,17 +75,12 @@ const EditAgent: React.FC = () => {
         </Box>
 
         <AgentForm
-          formPurpose="edit"
+          formPurpose="add"
           agentTypeDropdownOptions={agentTypeDropdownOptions}
           products={products}
-          submitButtonTitle="Сохранить"
+          submitButtonTitle="Добавить"
+          submitButtonIcon={<AddOutlined />}
           handleFormSubmit={handleFormSubmit}
-          onDeleteClick={handleAgentDelete}
-          agentInfo={
-            agent != undefined && agentSales != undefined
-              ? { agent: agent, agentSales: agentSales }
-              : undefined
-          }
         />
       </Container>
     </ThemeProvider>
