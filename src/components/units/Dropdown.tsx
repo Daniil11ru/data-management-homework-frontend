@@ -1,5 +1,12 @@
-import React from 'react';
-import { FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, SxProps } from '@mui/material';
+import React from "react";
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  SxProps,
+} from "@mui/material";
 
 interface DropdownProps {
   options: { value: string; label: string }[];
@@ -8,10 +15,21 @@ interface DropdownProps {
   placeholder?: string;
   className?: string;
   sx?: SxProps;
+  required?: boolean;
 }
 
-const Dropdown: React.FC<DropdownProps> = ({ options, onSelect, defaultValue, placeholder = 'Выберите...', className, sx }) => {
-  const [selectedValue, setSelectedValue] = React.useState<string>(defaultValue || '');
+const Dropdown: React.FC<DropdownProps> = ({
+  options,
+  onSelect,
+  defaultValue,
+  placeholder = "Выберите...",
+  className,
+  sx,
+  required,
+}) => {
+  const [selectedValue, setSelectedValue] = React.useState<string>(
+    defaultValue || ""
+  );
 
   const handleChange = (event: SelectChangeEvent<string>) => {
     const value = event.target.value;
@@ -23,9 +41,14 @@ const Dropdown: React.FC<DropdownProps> = ({ options, onSelect, defaultValue, pl
   };
 
   return (
-    <FormControl variant="outlined" className={className}>
+    <FormControl variant="outlined" className={className} required={required}>
       <InputLabel>{placeholder}</InputLabel>
-      <Select value={selectedValue} onChange={handleChange} label={placeholder} sx={sx}>
+      <Select
+        value={selectedValue}
+        onChange={handleChange}
+        label={placeholder}
+        sx={sx}
+      >
         {options.map((option) => (
           <MenuItem key={option.value} value={option.value}>
             {option.label}

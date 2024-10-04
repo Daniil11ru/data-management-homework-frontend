@@ -11,6 +11,8 @@ interface NumberFieldProps {
   error?: boolean;
   helperText?: string;
   defaultValueOnEmpty?: number | ""; // Новый проп для значения по умолчанию
+  maxLength?: number; // Максимальная длина значения
+  required?: boolean;
 }
 
 const NumberField: React.FC<NumberFieldProps> = ({
@@ -23,6 +25,8 @@ const NumberField: React.FC<NumberFieldProps> = ({
   error,
   helperText,
   defaultValueOnEmpty = 0, // Значение по умолчанию при пустом поле
+  maxLength, // Опциональный проп для установки максимальной длины
+  required
 }) => {
   const [isFocused, setIsFocused] = React.useState(false); // Состояние для отслеживания фокуса
 
@@ -38,6 +42,11 @@ const NumberField: React.FC<NumberFieldProps> = ({
     // Если значение пустое, подставляем defaultValueOnEmpty
     if (sanitizedValue === "") {
       sanitizedValue = defaultValueOnEmpty.toString();
+    }
+
+    // Если указано ограничение по длине и значение превышает его — обрезаем значение
+    if (maxLength && sanitizedValue.length > maxLength) {
+      sanitizedValue = sanitizedValue.slice(0, maxLength);
     }
 
     // Создаем новое событие с обновленным значением
@@ -84,6 +93,7 @@ const NumberField: React.FC<NumberFieldProps> = ({
       type="number"
       error={error}
       helperText={helperText}
+      required={required}
       InputLabelProps={{
         shrink: isFocused || value !== "", // Управляем поведением подсказки
       }}

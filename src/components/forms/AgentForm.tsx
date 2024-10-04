@@ -24,7 +24,7 @@ import {
   IconButton,
 } from "@mui/material";
 
-import { MuiTelInput, matchIsValidTel } from "mui-tel-input";
+import { MuiTelInput } from "mui-tel-input";
 
 import Dropdown from "../units/Dropdown";
 import NumberField from "../units/NumberField";
@@ -115,22 +115,27 @@ const AgentForm: React.FC<AgentFormProps> = ({
         setLoading(false);
       }
     } else {
-      setAgent(agentInfo?.agent || {
-        id: -1,
-        logo: "",
-        agentTypeId: agentTypeDropdownOptions.length > 0 ? Number(agentTypeDropdownOptions[0].value) : -1,
-        title: "Новый агент",
-        salesCount: 0,
-        phone: "",
-        priority: 0,
-        discount: 0,
-        email: "",
-        totalSales: 0,
-        address: "",
-        INN: "",
-        KPP: "",
-        directorName: "",
-      });
+      setAgent(
+        agentInfo?.agent || {
+          id: -1,
+          logo: "",
+          agentTypeId:
+            agentTypeDropdownOptions.length > 0
+              ? Number(agentTypeDropdownOptions[0].value)
+              : -1,
+          title: "Новый агент",
+          salesCount: 0,
+          phone: "",
+          priority: 0,
+          discount: 0,
+          email: "",
+          totalSales: 0,
+          address: "",
+          INN: "",
+          KPP: "",
+          directorName: "",
+        }
+      );
       setLoading(false);
     }
   }, [agentInfo, products]);
@@ -333,19 +338,22 @@ const AgentForm: React.FC<AgentFormProps> = ({
             </Button>
           )}
           {/* FIXME: кнопка удаления становится на миг доступна при загрузке, даже если у агента есть продажи */}
-          {formPurpose === "edit" && onDeleteClick && agentInfo && agentInfo.agentSales && (
-            <Button
-              variant="text"
-              color="error"
-              size="medium"
-              type="button"
-              onClick={onDeleteClick}
-              disabled={loading || agentInfo?.agentSales?.length > 0}
-              endIcon={<DeleteOutline />}
-            >
-              Удалить
-            </Button>
-          )}
+          {formPurpose === "edit" &&
+            onDeleteClick &&
+            agentInfo &&
+            agentInfo.agentSales && (
+              <Button
+                variant="text"
+                color="error"
+                size="medium"
+                type="button"
+                onClick={onDeleteClick}
+                disabled={loading || agentInfo?.agentSales?.length > 0}
+                endIcon={<DeleteOutline />}
+              >
+                Удалить
+              </Button>
+            )}
         </Box>
       </Box>
 
@@ -367,6 +375,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     : ""
                 }
                 fullWidth
+                required
                 sx={{ flex: 1 }}
               />
 
@@ -385,6 +394,14 @@ const AgentForm: React.FC<AgentFormProps> = ({
                 defaultValueOnEmpty={""}
                 onChange={handleInputChange}
                 fullWidth
+                maxLength={12} // Ограничиваем длину до 12 символов (максимальное значение)
+                error={agent?.INN.length !== 10 && agent?.INN.length !== 12} // Ошибка, если длина не 10 и не 12
+                helperText={
+                  agent?.INN.length !== 10 && agent?.INN.length !== 12
+                    ? "ИНН должен содержать 10 или 12 цифр"
+                    : ""
+                }
+                required
               />
 
               <MuiTelInput
@@ -408,6 +425,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     onSelect={handleSelectChange}
                     placeholder="Тип"
                     defaultValue={String(agent?.agentTypeId)}
+                    required
                   />
                 )}
 
@@ -419,6 +437,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     onSelect={handleSelectChange}
                     placeholder="Тип"
                     defaultValue={agentTypeDropdownOptions[0].value}
+                    required
                   />
                 )}
 
@@ -437,6 +456,14 @@ const AgentForm: React.FC<AgentFormProps> = ({
                 defaultValueOnEmpty={""}
                 onChange={handleInputChange}
                 fullWidth
+                maxLength={9} // Ограничиваем длину до 12 символов (максимальное значение)
+                error={agent?.KPP.length !== 9} // Ошибка, если длина не 10 и не 12
+                helperText={
+                  agent?.KPP.length !== 9
+                    ? "КПП должен содержать 9 цифр"
+                    : ""
+                }
+                required
               />
 
               <TextField
