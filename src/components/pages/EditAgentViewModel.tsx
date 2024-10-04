@@ -94,9 +94,9 @@ export const EditAgentViewModel = (id: number) => {
     }
   };
 
-  const addSale = async (agentId: number, sale: Sale, productId: number) => {
+  const addSale = async (agentId: number, sale: Sale) => {
     try {
-      await agentRepository.addSale(agentId, sale, productId);
+      await agentRepository.addSale(agentId, sale);
     } catch (err) {
       setError("Ошибка при добавлении продажи");
       console.error("Ошибка при добавлении продажи:", err);

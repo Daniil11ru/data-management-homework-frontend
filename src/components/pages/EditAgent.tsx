@@ -49,10 +49,9 @@ const EditAgent: React.FC = () => {
     try {
       for (const operation of salesOperations) {
         if (operation.type === SaleOperationType.DELETE) {
-          // TODO: реализовать
-          // deleteSale(operation.sale.id);
+          deleteSale(operation.sale.id);
         } else {
-          addSale(updatedAgent.id, operation.sale, operation.productId);
+          addSale(updatedAgent.id, operation.sale);
         }
       }
 

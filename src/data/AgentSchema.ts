@@ -7,6 +7,7 @@ const AgentSchema = z.object({
   INN: z.string(),
   KPP: z.string(),
   directorName: z.string(),
+  agentType: z.string().optional(),
   agentTypeId: z.number(),
   salesCount: z.number(),
   phone: z.string(),
@@ -24,6 +25,7 @@ type AgentWithoutId = z.infer<typeof AgentWithoutIdSchema>;
 const AgentKey = {
   id: "id",
   logo: "logo",
+  agentType: "agentType",
   agentTypeId: "agentTypeId",
   title: "title",
   salesCount: "salesCount",

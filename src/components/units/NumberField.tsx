@@ -24,6 +24,8 @@ const NumberField: React.FC<NumberFieldProps> = ({
   helperText,
   defaultValueOnEmpty = 0, // Значение по умолчанию при пустом поле
 }) => {
+  const [isFocused, setIsFocused] = React.useState(false); // Состояние для отслеживания фокуса
+
   // Обрабатываем изменение значения и удаляем ведущие нули
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let sanitizedValue = event.target.value;
@@ -60,6 +62,15 @@ const NumberField: React.FC<NumberFieldProps> = ({
     }
   };
 
+  // Управление состоянием фокуса
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+  };
+
   return (
     <TextField
       name={name}
@@ -68,13 +79,13 @@ const NumberField: React.FC<NumberFieldProps> = ({
       value={value.toString()} // Преобразуем значение в строку для корректного отображения
       onChange={handleInputChange}
       onKeyDown={handleKeyDown} // Ограничиваем ввод только цифрами
+      onFocus={handleFocus} // Устанавливаем фокус
+      onBlur={handleBlur} // Убираем фокус
       type="number"
       error={error}
       helperText={helperText}
-      slotProps={{
-        inputLabel: {
-          shrink: true,
-        },
+      InputLabelProps={{
+        shrink: isFocused || value !== "", // Управляем поведением подсказки
       }}
       sx={{
         ...sx,

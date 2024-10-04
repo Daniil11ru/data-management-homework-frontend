@@ -44,7 +44,6 @@ import { SaleOperation, SaleOperationType, SaleSource } from "../../data/Utils";
 
 type ExtendedSale = Sale & {
   source: SaleSource;
-  productId: number;
 };
 
 interface AgentFormProps {
@@ -52,13 +51,14 @@ interface AgentFormProps {
   products: Product[];
   submitButtonTitle: string;
   submitButtonIcon?: React.ReactNode;
+  handleAgentChange?: (agent: Agent) => void;
   handleFormSubmit: (
     updatedAgent: Agent,
     salesOperations: SaleOperation[]
   ) => void;
   formPurpose: "add" | "edit";
   onDeleteClick?: () => void;
-  agentInfo?: { agent: Agent; agentSales: Sale[] };
+  agentInfo?: { agent: Agent; agentSales?: Sale[] };
 }
 
 const AgentForm: React.FC<AgentFormProps> = ({
@@ -66,6 +66,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
   products,
   submitButtonTitle,
   submitButtonIcon,
+  handleAgentChange,
   handleFormSubmit,
   formPurpose,
   onDeleteClick,
@@ -77,8 +78,9 @@ const AgentForm: React.FC<AgentFormProps> = ({
   const [agent, setAgent] = useState<Agent | null>(null);
   const [agentSales, setAgentSales] = useState<ExtendedSale[]>([]);
   const [newSale, setNewSale] = useState<ExtendedSale>({
+    id: -1,
     product: "",
-    productId: 0,
+    productId: -1,
     productCount: 0,
     date: new Date(),
     source: SaleSource.LOCAL,
@@ -92,32 +94,32 @@ const AgentForm: React.FC<AgentFormProps> = ({
   const [salesOperations, setSalesOperations] = useState<SaleOperation[]>([]);
 
   useEffect(() => {
+    const productMap = new Map<string, number>();
+    products.forEach((product) => {
+      productMap.set(product.title, product.id);
+    });
+    setProductTitleToProductId(productMap);
+
     if (formPurpose === "edit") {
       if (agentInfo && agentInfo.agentSales) {
         setAgent(agentInfo.agent);
         setAgentDefault(agentInfo.agent);
         const salesWithSource = agentInfo.agentSales.map((sale) => ({
           ...sale,
-          productId: productTitleToProductId.get(sale.product) ?? -1,
+          productId: sale.productId ?? -1,
           source: SaleSource.REMOTE,
         }));
         setAgentSales(salesWithSource);
         setAgentSalesDefault(salesWithSource);
 
-        const productMap = new Map<string, number>();
-        products.forEach((product) => {
-          productMap.set(product.title, product.id);
-        });
-        setProductTitleToProductId(productMap);
-
         setLoading(false);
       }
     } else {
-      setAgent({
+      setAgent(agentInfo?.agent || {
         id: -1,
         logo: "",
         agentTypeId: agentTypeDropdownOptions.length > 0 ? Number(agentTypeDropdownOptions[0].value) : -1,
-        title: "Агент",
+        title: "Новый агент",
         salesCount: 0,
         phone: "",
         priority: 0,
@@ -140,6 +142,9 @@ const AgentForm: React.FC<AgentFormProps> = ({
         [event.target.name]: event.target.value,
       };
 
+      if (handleAgentChange) {
+        handleAgentChange(updatedAgent);
+      }
       setAgent(updatedAgent);
     }
   };
@@ -150,6 +155,9 @@ const AgentForm: React.FC<AgentFormProps> = ({
         ...agent,
         agentTypeId: Number(agentTypeId),
       };
+      if (handleAgentChange) {
+        handleAgentChange(updatedAgent);
+      }
       setAgent(updatedAgent);
     }
   };
@@ -160,6 +168,9 @@ const AgentForm: React.FC<AgentFormProps> = ({
         ...agent,
         phone: phoneNumber,
       };
+      if (handleAgentChange) {
+        handleAgentChange(updatedAgent);
+      }
       setAgent(updatedAgent);
     }
   };
@@ -172,6 +183,9 @@ const AgentForm: React.FC<AgentFormProps> = ({
         ...agent,
         logo: URL.createObjectURL(file),
       };
+      if (handleAgentChange) {
+        handleAgentChange(updatedAgent);
+      }
       setAgent(updatedAgent);
     }
   };
@@ -186,12 +200,14 @@ const AgentForm: React.FC<AgentFormProps> = ({
 
   const handleAddSale = () => {
     if (newSale) {
+      console.log(newSale);
       setSalesOperations([
         ...salesOperations,
         new SaleOperation(SaleOperationType.ADD, newSale, newSale.productId),
       ]);
       setAgentSales([...agentSales, newSale]);
       setNewSale({
+        id: -1,
         product: "",
         productId: -1,
         productCount: 0,
@@ -285,6 +301,10 @@ const AgentForm: React.FC<AgentFormProps> = ({
                   ...agent,
                   title: newValue,
                 };
+
+                if (handleAgentChange) {
+                  handleAgentChange(updatedAgent);
+                }
                 setAgent(updatedAgent);
               }
             }}
@@ -313,14 +333,14 @@ const AgentForm: React.FC<AgentFormProps> = ({
             </Button>
           )}
           {/* FIXME: кнопка удаления становится на миг доступна при загрузке, даже если у агента есть продажи */}
-          {formPurpose === "edit" && onDeleteClick && agentInfo && (
+          {formPurpose === "edit" && onDeleteClick && agentInfo && agentInfo.agentSales && (
             <Button
               variant="text"
               color="error"
               size="medium"
               type="button"
               onClick={onDeleteClick}
-              disabled={loading || agentInfo?.agentSales.length > 0}
+              disabled={loading || agentInfo?.agentSales?.length > 0}
               endIcon={<DeleteOutline />}
             >
               Удалить
@@ -487,6 +507,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
         onClose={() => {
           setDialogOpen(false);
           setNewSale({
+            id: -1,
             product: "",
             productId: -1,
             productCount: 0,

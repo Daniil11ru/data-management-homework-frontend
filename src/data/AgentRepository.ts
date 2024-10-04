@@ -22,8 +22,8 @@ export class AgentRepository {
     this.agentSource.updateAgent(updatedAgent);
   }
 
-  async addAgent(agent: AgentWithoutId) {
-    this.agentSource.addAgent(agent);
+  async addAgent(agent: AgentWithoutId): Promise<number | null> {
+    return this.agentSource.addAgent(agent);
   }
 
   async deleteAgent(id: number) {
@@ -34,8 +34,8 @@ export class AgentRepository {
     return (await this.agentSource.getSales(agentId));
   }
 
-  async addSale(agentId: number, sale: Sale, productId: number) {
-    this.agentSource.addSale(agentId, sale, productId);
+  async addSale(agentId: number, sale: Sale) {
+    this.agentSource.addSale(agentId, sale);
   }
 
   async deleteSale(saleId: number) {

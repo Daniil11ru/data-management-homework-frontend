@@ -54,18 +54,19 @@ export const AddAgentViewModel = (id: number) => {
     fetchProducts();
   }, []);
 
-  const addAgent = async (agent: Agent) => {
+  const addAgent = async (agent: Agent) : Promise<number | null> => {
     try {
-      await agentRepository.addAgent(agent);
+      return await agentRepository.addAgent(agent);
     } catch (err) {
       setError("Ошибка при добавлении агента");
       console.error("Ошибка при добавлении агента:", err);
+      return null;
     }
   };
 
-  const addSale = async (agentId: number, sale: Sale, productId: number) => {
+  const addSale = async (agentId: number, sale: Sale) => {
     try {
-      await agentRepository.addSale(agentId, sale, productId);
+      await agentRepository.addSale(agentId, sale);
     } catch (err) {
       setError("Ошибка при добавлении продажи");
       console.error("Ошибка при добавлении продажи:", err);

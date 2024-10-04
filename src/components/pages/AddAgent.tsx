@@ -11,26 +11,47 @@ import { Agent } from "../../data/AgentSchema";
 import { SaleOperation, SaleOperationType } from "../../data/Utils";
 import BreadcrumbNav from "../units/BreadcrumbNav";
 import { AddOutlined } from "@mui/icons-material";
+import { Breadcrumb } from "./utils/Breadcrumb";
 
-const EditAgent: React.FC = () => {
+const AddAgent: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { setError, addAgent, agentTypeDropdownOptions, addSale, products } =
     AddAgentViewModel(Number(id));
+  const [agentTitle, setAgentTitle] = React.useState<string>("Новый агент");
+  const [breadcrumbs, setBreadcrumbs] = React.useState<Breadcrumb[]>([
+    { label: "Агенты", path: "/" },
+    { label: agentTitle },
+  ]);
 
   const navigate = useNavigate();
+
+  const handleAgentChange = (agent: Agent) => {
+    if (agentTitle !== agent.title) {
+      setAgentTitle(agent.title);
+    }
+  };
 
   const handleFormSubmit = async (
     agent: Agent,
     salesOperations: SaleOperation[]
   ) => {
     try {
-      console.log(agent);
-      await addAgent(agent);
-      for (const operation of salesOperations) {
-        if (operation.type === SaleOperationType.ADD) {
-          addSale(agent.id, operation.sale, operation.productId);
+      const agentId = await addAgent(agent);
+
+      if (agentId) {
+        agent.id = agentId;
+
+        for (const operation of salesOperations) {
+          if (operation.type === SaleOperationType.ADD) {
+            console.log("Продажа:", operation.sale);
+            addSale(agent.id, operation.sale);
+          }
         }
       }
+      else {
+        console.log("Не удалось добавить продажи новосозданного агента");
+      }
+
       navigate("/");
     } catch (err) {
       console.error("Ошибка при добавлении агента:", err);
@@ -61,11 +82,6 @@ const EditAgent: React.FC = () => {
     },
   });
 
-  const breadcrumbs = [
-    { label: "Агенты", path: "/" },
-    { label: "Новый агент" },
-  ];
-
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
@@ -80,6 +96,7 @@ const EditAgent: React.FC = () => {
           products={products}
           submitButtonTitle="Добавить"
           submitButtonIcon={<AddOutlined />}
+          handleAgentChange={handleAgentChange}
           handleFormSubmit={handleFormSubmit}
         />
       </Container>
@@ -87,4 +104,4 @@ const EditAgent: React.FC = () => {
   );
 };
 
-export default EditAgent;
+export default AddAgent;
