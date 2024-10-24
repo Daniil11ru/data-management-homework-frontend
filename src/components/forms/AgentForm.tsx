@@ -22,6 +22,9 @@ import {
   TableHead,
   TableRow,
   IconButton,
+  useTheme,
+  darken,
+  lighten,
 } from "@mui/material";
 
 import { MuiTelInput } from "mui-tel-input";
@@ -40,7 +43,7 @@ import {
   SaveOutlined,
 } from "@mui/icons-material";
 import dayjs from "dayjs";
-import { SaleOperation, SaleOperationType, SaleSource } from "../../data/Utils";
+import { rgbToHex, SaleOperation, SaleOperationType, SaleSource } from "../../data/Utils";
 
 type ExtendedSale = Sale & {
   source: SaleSource;
@@ -92,6 +95,21 @@ const AgentForm: React.FC<AgentFormProps> = ({
     Map<string, number>
   >(new Map());
   const [salesOperations, setSalesOperations] = useState<SaleOperation[]>([]);
+
+  const theme = useTheme();
+  const [placeholderImageLink, setPlaceholderImageLink] = useState("");
+
+  useEffect(() => {
+    const newPlaceholderLink =
+      theme.palette.mode === "light"
+        ? `https://placehold.co/50x50/${rgbToHex(
+            darken(theme.palette.background.paper, 0.2)
+          )}/404040`
+        : `https://placehold.co/50x50/${rgbToHex(
+            lighten(theme.palette.background.paper, 0.2)
+          )}/C0C0C0`;
+    setPlaceholderImageLink(newPlaceholderLink);
+  }, [theme]);
 
   useEffect(() => {
     const productMap = new Map<string, number>();
@@ -294,7 +312,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
               borderRadius: 2,
             }}
             alt="Пример изображения"
-            src= {agent?.logo || "https://via.placeholder.com/50"}
+            src= {agent?.logo || placeholderImageLink}
           />
 
           <EditableTextLabel

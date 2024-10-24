@@ -33,3 +33,20 @@ export const capitalizeKeys = (obj: any): any => {
 
   return newObj;
 };
+
+
+export function rgbToHex(rgb: string): string {
+  // Извлекаем значения R, G и B с помощью регулярного выражения
+  const result = rgb.match(/\d+/g);
+  if (!result || result.length < 3) {
+    throw new Error("Invalid RGB format");
+  }
+
+  // Преобразуем значения R, G и B в HEX
+  const r = parseInt(result[0], 10).toString(16).padStart(2, "0");
+  const g = parseInt(result[1], 10).toString(16).padStart(2, "0");
+  const b = parseInt(result[2], 10).toString(16).padStart(2, "0");
+
+  // Объединяем и возвращаем HEX-строку
+  return `${r}${g}${b}`;
+}

@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardMedia, Typography, Box } from "@mui/material";
 import PhoneIcon from "@mui/icons-material/Phone";
 import SellIcon from "@mui/icons-material/Sell";
 import StarIcon from "@mui/icons-material/Star";
 import { teal } from "@mui/material/colors";
 
-import { lighten } from "@mui/system";
+import { darken, lighten } from "@mui/system";
 
 import { AgentCardSelectableProps } from "./AgentCard.types";
 
@@ -29,6 +29,11 @@ const AgentCardVertical: React.FC<AgentCardSelectableProps> = ({
     }
   };
 
+  useEffect(() => {
+    setImageSrc(image || placeholderImage || "");
+  }, [image, placeholderImage]);
+
+
   return (
     <Card
       sx={(theme) => ({
@@ -37,8 +42,10 @@ const AgentCardVertical: React.FC<AgentCardSelectableProps> = ({
         boxShadow: 3,
         cursor: "pointer",
         backgroundColor: isSelected
-          ? lighten(theme.palette.background.paper, 0.1)
-          : theme.palette.background.paper,
+        ? theme.palette.mode === "light"
+          ? darken(theme.palette.background.paper, 0.1)
+          : lighten(theme.palette.background.paper, 0.1)
+        : theme.palette.background.paper,
         transition: "background-color 0.2s ease",
       })}
       onClick={onClick}

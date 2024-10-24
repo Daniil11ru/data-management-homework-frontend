@@ -11,6 +11,7 @@ import { Agent } from "../../data/AgentSchema";
 import { Sale } from "../../data/SaleSchema";
 import { SaleOperation, SaleOperationType } from "../../data/Utils";
 import BreadcrumbNav from "../units/BreadcrumbNav";
+import ThemeToggleButton from "../units/ThemeToggleButton";
 
 const EditAgent: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -63,57 +64,41 @@ const EditAgent: React.FC = () => {
     }
   };
 
-  const darkTheme = createTheme({
-    palette: {
-      mode: "dark",
-    },
-    components: {
-      MuiCssBaseline: {
-        styleOverrides: {
-          "input[type='date']::-webkit-calendar-picker-indicator": {
-            filter: "invert(1)",
-          },
-          "*::-webkit-scrollbar": {
-            width: "8px",
-            backgroundColor: "#2e2e2e",
-          },
-          "*::-webkit-scrollbar-thumb": {
-            backgroundColor: "#6b6b6b",
-            borderRadius: "8px",
-          },
-        },
-      },
-    },
-  });
-
   const breadcrumbs = [
     { label: "Агенты", path: "/" },
     { label: agent?.title || "Редактирование агента" },
   ];
 
   return (
-    <ThemeProvider theme={darkTheme}>
-      <CssBaseline />
-      <Container maxWidth="md">
-        <Box marginY={2} marginBottom={4}>
-          <BreadcrumbNav paths={breadcrumbs} />
-        </Box>
+    <Container maxWidth="md">
+      <Box
+        sx={{
+          position: "absolute",
+          top: 5,
+          left: 5,
+        }}
+      >
+        <ThemeToggleButton />
+      </Box>
 
-        <AgentForm
-          formPurpose="edit"
-          agentTypeDropdownOptions={agentTypeDropdownOptions}
-          products={products}
-          submitButtonTitle="Сохранить"
-          handleFormSubmit={handleFormSubmit}
-          onDeleteClick={handleAgentDelete}
-          agentInfo={
-            agent != undefined && agentSales != undefined
-              ? { agent: agent, agentSales: agentSales }
-              : undefined
-          }
-        />
-      </Container>
-    </ThemeProvider>
+      <Box marginY={2} marginBottom={4}>
+        <BreadcrumbNav paths={breadcrumbs} />
+      </Box>
+
+      <AgentForm
+        formPurpose="edit"
+        agentTypeDropdownOptions={agentTypeDropdownOptions}
+        products={products}
+        submitButtonTitle="Сохранить"
+        handleFormSubmit={handleFormSubmit}
+        onDeleteClick={handleAgentDelete}
+        agentInfo={
+          agent != undefined && agentSales != undefined
+            ? { agent: agent, agentSales: agentSales }
+            : undefined
+        }
+      />
+    </Container>
   );
 };
 
