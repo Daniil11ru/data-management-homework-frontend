@@ -50,7 +50,7 @@ class AgentRemoteSource extends AgentSource {
       priority: agent.Priority,
       discount: agent.Discount,
       email: agent.Email,
-      logo: agent.Logo,
+      logo: agent.Logo ? `http://${this.ip}/uploads/logo/${agent.Logo}` : undefined, 
       totalSales: agent.TotalSales,
     };
   }
@@ -72,7 +72,7 @@ class AgentRemoteSource extends AgentSource {
       priority: agent.Priority,
       discount: agent.Discount,
       email: agent.Email,
-      logo: agent.Logo,
+      logo: agent.Logo ? `http://${this.ip}/uploads/logo/${agent.Logo}` : undefined,
       totalSales: agent.TotalSales,
     }));
   }

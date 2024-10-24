@@ -6,6 +6,7 @@ export interface AgentCardProps {
   phone: string;
   priority: number;
   discount: number;
+  placeholderImage?: string;
 }
 
 export interface AgentCardSelectableProps extends AgentCardProps {

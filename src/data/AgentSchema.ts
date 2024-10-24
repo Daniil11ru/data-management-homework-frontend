@@ -14,7 +14,7 @@ const AgentSchema = z.object({
   priority: z.number(),
   discount: z.number(),
   email: z.string(),
-  logo: z.string(),
+  logo: z.string().optional(),
   totalSales: z.number()
 });
 type Agent = z.infer<typeof AgentSchema>;

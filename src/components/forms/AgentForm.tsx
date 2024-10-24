@@ -294,7 +294,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
               borderRadius: 2,
             }}
             alt="Пример изображения"
-            src="https://via.placeholder.com/50x50"
+            src= {agent?.logo || "https://via.placeholder.com/50"}
           />
 
           <EditableTextLabel

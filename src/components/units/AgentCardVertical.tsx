@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardMedia, Typography, Box } from "@mui/material";
 import PhoneIcon from "@mui/icons-material/Phone";
 import SellIcon from "@mui/icons-material/Sell";
@@ -19,7 +19,16 @@ const AgentCardVertical: React.FC<AgentCardSelectableProps> = ({
   discount,
   isSelected,
   onClick,
+  placeholderImage,
 }) => {
+  const [imageSrc, setImageSrc] = useState<string>(image);
+
+  const handleImageLoadError = () => {
+    if (placeholderImage != undefined) {
+      setImageSrc(placeholderImage);
+    }
+  };
+
   return (
     <Card
       sx={(theme) => ({
@@ -49,7 +58,11 @@ const AgentCardVertical: React.FC<AgentCardSelectableProps> = ({
             width: "100%",
           }}
         >
-          <Box display="flex" flexDirection="row" justifyContent="space-between">
+          <Box
+            display="flex"
+            flexDirection="row"
+            justifyContent="space-between"
+          >
             <Typography
               variant="h6"
               fontWeight="bold"
@@ -84,8 +97,9 @@ const AgentCardVertical: React.FC<AgentCardSelectableProps> = ({
             borderRadius: 2,
             marginTop: 2,
           }}
-          image={image}
+          image={imageSrc}
           alt={`${name} image`}
+          onError={handleImageLoadError}
         />
 
         <Box
