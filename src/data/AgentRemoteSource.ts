@@ -11,13 +11,12 @@ class AgentRemoteSource extends AgentSource {
       address: agent.address,
       inn: agent.INN,
       kpp: agent.KPP,
-      directorName: agent.directorName,
-      agentTypeID: agent.agentTypeId,
+      director_name: agent.directorName,
+      agent_type: agent.agentTypeId,
       phone: agent.phone,
       priority: agent.priority,
-      discount: agent.discount,
       email: agent.email,
-      logo: agent.logo,
+      logo: agent.logo ? agent.logo.substring(agent.logo.lastIndexOf("/") + 1) : "",
     };
   }
 
@@ -79,6 +78,7 @@ class AgentRemoteSource extends AgentSource {
 
   async updateAgent(agent: Agent) {
     const agentWithoutId = this.parseAgentForUpdate(agent);
+    console.log(agentWithoutId);
 
     try {
       const response = await fetch(
